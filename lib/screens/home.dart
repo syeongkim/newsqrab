@@ -26,11 +26,46 @@ class _HomeState extends State<Home> {
     });
   }
 
+  void _showNotifications(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('알림'),
+          content: Text('여기에 알림 내용이 표시됩니다.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('닫기'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('메인 화면'),
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Image.asset(
+            'assets/images/newsQrab.jpg',
+            height: kToolbarHeight - 8,
+          ),
+        ),
+        actions: [
+          IconButton(
+            iconSize: 32.0, // 아이콘 크기를 30으로 설정
+            icon: Icon(Icons.notifications),
+            onPressed: () {
+              _showNotifications(context);
+            },
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _selectedIndex,
