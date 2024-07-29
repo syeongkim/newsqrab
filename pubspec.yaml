@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   material_design_icons_flutter: ^5.0.5955
   http: ^0.13.5
+  url_launcher: ^6.0.20
 
 dev_dependencies:
   flutter_test:
