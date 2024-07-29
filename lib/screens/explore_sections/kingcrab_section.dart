@@ -7,8 +7,17 @@ class KingCrabSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Image.asset('assets/images/newsQrab.jpg'),
-          title: Text('Popular KingCrab'),
+          leading: Image.asset(
+            'assets/images/newsQrab.jpg',
+            width: 25.0, // 원하는 가로 크기로 변경
+            height: 25.0, // 원하는 세로 크기로 변경
+          ),
+          title: Text(
+            'Popular KingCrab',
+            style: TextStyle(
+              fontSize: 20.0, // 원하는 글자 크기
+            ),
+          ),
         ),
         Container(
           height: 150,
