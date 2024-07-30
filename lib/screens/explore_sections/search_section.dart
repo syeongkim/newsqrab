@@ -1,5 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:newsqrap/services/naver_search_service.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+Future<void> _launchUrl(String url) async {
+  // ignore: deprecated_member_use
+  if (await canLaunch(url)) {
+    // ignore: deprecated_member_use
+    await launch(url);
+  } else {
+    throw 'Could not launch $url';
+  }
+}
 
 class SearchSection extends StatefulWidget {
   @override
@@ -20,8 +31,10 @@ class _SearchSectionState extends State<SearchSection> {
     });
     try {
       final results = await _naverSearchService.search(_controller.text);
+      print('Fetched results: $results'); // 결과 로깅
       setState(() {
-        _results = results;
+        _results = results; // 결과 상태 업데이트
+        print('Updated results: $_results'); // 상태 업데이트 후 로깅
       });
     } catch (e) {
       setState(() {
@@ -58,18 +71,21 @@ class _SearchSectionState extends State<SearchSection> {
         if (_isLoading) CircularProgressIndicator(),
         if (_error != null) Text(_error!),
         if (_results.isNotEmpty)
-          Expanded(
+          Container(
+            height: 300, // 일정 높이 지정
             child: ListView.builder(
               itemCount: _results.length,
               itemBuilder: (context, index) {
                 return ListTile(
                   title: Text(_results[index]['title']),
                   subtitle: Text(_results[index]['description']),
+                  onTap: () => _launchUrl(_results[index]['link']),
                 );
               },
             ),
           ),
-        if (!_isLoading && _results.isEmpty && _error == null) Text('검색 결과가 없습니다'),
+        if (!_isLoading && _results.isEmpty && _error == null)
+          Text('검색 결과가 없습니다'),
       ],
     );
   }
