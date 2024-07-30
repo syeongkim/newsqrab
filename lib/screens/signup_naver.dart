@@ -54,31 +54,59 @@ class _SignupNaverState extends State<SignupNaver> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('회원가입'),
+        backgroundColor: Colors.white, // AppBar 배경색 흰색
+        title: Row(
+          children: [
+            Image.asset('assets/images/newsQrab.jpg', height: 40),
+            SizedBox(width: 10),
+            Image.asset('assets/images/newsqrab_l.jpg', height: 40),
+            SizedBox(width: 10),
+            Text('회원가입'),
+          ],
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+      body: Container(
+        color: Colors.white, // Ensure the background color is white
         child: Column(
           children: <Widget>[
-            TextField(
-              controller: _nicknameController,
-              decoration: InputDecoration(labelText: 'Nickname'),
-            ),
-            if (_profileImage != null)
-              Image.file(_profileImage!, width: 100, height: 100),
-            ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Upload Profile Picture'),
-            ),
-            TextField(
-              controller: _bioController,
-              decoration: InputDecoration(labelText: 'Bio'),
-              maxLines: 3,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _signup,
-              child: Text('Sign Up'),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: <Widget>[
+                    TextField(
+                      controller: _nicknameController,
+                      decoration: InputDecoration(labelText: '닉네임'),
+                    ),
+                    if (_profileImage != null)
+                      Image.file(_profileImage!, width: 100, height: 100),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _pickImage,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black, // Background color for the button
+                        foregroundColor: Colors.white, // Text color for the button
+                      ),
+                      child: Text('프로필 사진 업로드'),
+                    ),
+                    TextField(
+                      controller: _bioController,
+                      decoration: InputDecoration(labelText: '자기소개'),
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _signup,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.black, // Background color for the button
+                        foregroundColor: Colors.white, // Text color for the button
+                      ),
+                      child: Text('회원가입'),
+                    ),
+                    SizedBox(height: 50), // Add space to ensure scrolling if needed
+                  ],
+                ),
+              ),
             ),
           ],
         ),
