@@ -21,17 +21,17 @@ class _MyclipState extends State<Myclip> {
         "sentiment_very_satisfied": 0,
         "sentiment_satisfied": 0,
         "sentiment_dissatisfied": 0,
-        "sentiment_very_dissatisfied": 0,
+        "sentiment_very_dissatisfied": 1,
       }
     },
     {
-      "scrapContent": "\"시원하네\" 한국 남자 양궁 단체, 현격한 기량 차이 꺾고 4강 진출. 일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
-      "scrapTime": "2024.7.29 10:00 PM",
+      "scrapContent": "일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
+      "scrapTime": "2024.7.29 09:00 PM",
       "link": "https://www.fnnews.com/news/202407292153475630",
       "emoji": "sentiment_very_dissatisfied",
       "reactions": {
         "sentiment_very_satisfied": 0,
-        "sentiment_satisfied": 0,
+        "sentiment_satisfied": 1,
         "sentiment_dissatisfied": 0,
         "sentiment_very_dissatisfied": 0,
       }

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:flutter/material.dart'; // Flutter의 기본 위젯 패키지 임포트
+import 'package:http/http.dart' as http; // HTTP 요청을 위한 패키지 임포트
+import 'dart:convert'; // JSON 변환을 위한 패키지 임포트
 
 class Scrap extends StatefulWidget {
   const Scrap({Key? key}) : super(key: key);
@@ -10,22 +10,24 @@ class Scrap extends StatefulWidget {
 }
 
 class _ScrapState extends State<Scrap> {
-  List<dynamic> _articles = [];
+  List<dynamic> _articles = []; // 기사를 저장할 리스트 변수
 
   @override
   void initState() {
     super.initState();
-    _fetchArticles();
+    _fetchArticles(); // 위젯 초기화 시 기사를 불러오는 메서드 호출
   }
 
   Future<void> _fetchArticles() async {
-    final response = await http.get(Uri.parse('http://localhost:3000/articles')); // 실제 백엔드 API URL로 변경하세요
+    // API로부터 기사를 가져오는 비동기 메서드
+    final response = await http.get(Uri.parse('http://10.40.0.130:3000/articles')); // 백엔드 API 호출
     if (response.statusCode == 200) {
+      // 요청이 성공적일 때
       setState(() {
-        _articles = jsonDecode(response.body);
+        _articles = jsonDecode(response.body); // JSON 응답을 디코딩하여 _articles에 저장
       });
     } else {
-      throw Exception('Failed to load articles');
+      throw Exception('Failed to load articles'); // 요청 실패 시 예외 처리
     }
   }
 
@@ -33,21 +35,26 @@ class _ScrapState extends State<Scrap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scrap News'),
+        // AppBar의 title을 제거
+        title: null,
+        // AppBar를 빈 공간으로 대체 (필요에 따라 preferredSize를 사용)
+        toolbarHeight: 0, // AppBar의 높이를 0으로 설정
+        elevation: 0, // 그림자 효과를 제거
       ),
       body: _articles.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시
           : ListView.builder(
-        itemCount: _articles.length,
+        // 기사가 있을 때 리스트로 보여줌
+        itemCount: _articles.length, // 기사 개수
         itemBuilder: (context, index) {
           return ListTile(
-            title: Text(_articles[index]['title']),
-            subtitle: Text(_articles[index]['author']),
+            title: Text(_articles[index]['title']), // 기사 제목 표시
+            subtitle: Text(_articles[index]['author']), // 기사 저자 표시
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ArticleDetailPage(article: _articles[index]),
+                  builder: (context) => ArticleDetailPage(article: _articles[index]), // 기사 클릭 시 상세 페이지로 이동
                 ),
               );
             },
@@ -59,7 +66,7 @@ class _ScrapState extends State<Scrap> {
 }
 
 class ArticleDetailPage extends StatefulWidget {
-  final dynamic article;
+  final dynamic article; // 기사를 저장할 변수
 
   ArticleDetailPage({required this.article});
 
@@ -68,9 +75,12 @@ class ArticleDetailPage extends StatefulWidget {
 }
 
 class _ArticleDetailPageState extends State<ArticleDetailPage> {
-  String? _selectedText;
+  String? _selectedText; // 선택된 텍스트를 저장할 변수
+  String? _selectedEmoji; // 선택된 이모지를 저장할 변수
+  bool _isScrapButtonVisible = false; // 스크랩 버튼의 가시성을 제어할 변수
 
   void _showPopupMenu(BuildContext context, Offset position) {
+    // 팝업 메뉴를 표시하는 메서드
     final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
 
     if (_selectedText != null && _selectedText!.isNotEmpty) {
@@ -82,7 +92,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
         ),
         items: [
           PopupMenuItem(
-            value: 'very_satisfied',
+            value: 'sentiment_very_satisfied',
             child: Row(
               children: [
                 Icon(Icons.sentiment_very_satisfied),
@@ -92,7 +102,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
             ),
           ),
           PopupMenuItem(
-            value: 'satisfied',
+            value: 'sentiment_satisfied',
             child: Row(
               children: [
                 Icon(Icons.sentiment_satisfied),
@@ -102,7 +112,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
             ),
           ),
           PopupMenuItem(
-            value: 'neutral',
+            value: 'sentiment_neutral',
             child: Row(
               children: [
                 Icon(Icons.sentiment_neutral),
@@ -112,7 +122,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
             ),
           ),
           PopupMenuItem(
-            value: 'dissatisfied',
+            value: 'sentiment_dissatisfied',
             child: Row(
               children: [
                 Icon(Icons.sentiment_dissatisfied),
@@ -124,171 +134,41 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
         ],
       ).then((value) {
         if (value != null) {
-          // 스크랩 기능을 수행합니다.
-          // 여기에서 선택된 텍스트와 반응을 저장하는 로직을 추가할 수 있습니다.
           setState(() {
-            // 예시: 선택된 텍스트와 반응을 콘솔에 출력
-            print('Text: $_selectedText, Reaction: $value');
+            _selectedEmoji = value; // 선택된 이모지를 저장
+            _isScrapButtonVisible = true; // 스크랩 버튼 가시화
           });
         }
       });
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.article['title']),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GestureDetector(
-          onTapDown: (TapDownDetails details) {
-            _showPopupMenu(context, details.globalPosition);
-          },
-          child: SelectableText(
-            widget.article['content'],
-            showCursor: true,
-            onSelectionChanged: (selection, cause) {
-              setState(() {
-                if (selection.start != -1 && selection.end != -1) {
-                  _selectedText = widget.article['content']
-                      .substring(selection.start, selection.end)
-                      .trim();
-                }
-              });
-            },
-          ),
-        ),
-      ),
+  Future<void> _scrapArticle() async {
+    // 스크랩 데이터를 서버에 전송하는 메서드
+    final scrapData = {
+      "title": widget.article['title'], // 기사 제목
+      "url": widget.article['url'], // 기사 URL
+      "date": widget.article['date'], // 기사 날짜
+      "userId": "60d0fe4f5311236168a109ca",  // 실제 사용자 ID로 변경해야 함
+      "articleId": widget.article['_id'], // 기사 ID
+      "highlightedText": _selectedText, // 선택된 텍스트
+      "myemoji": _selectedEmoji, // 선택된 이모지
+      "followerEmojis": [], // 팔로워 이모지 초기화
+      "createdAt": DateTime.now().toIso8601String(), // 생성 시간
+      "updatedAt": DateTime.now().toIso8601String(), // 업데이트 시간
+    };
+
+    final response = await http.post(
+      Uri.parse('http://10.40.0.130:3000/scraps'), // 백엔드 API URL로 변경
+      headers: {"Content-Type": "application/json"}, // 요청 헤더 설정
+      body: jsonEncode(scrapData), // 스크랩 데이터를 JSON으로 인코딩
     );
-  }
-}
 
-
-
-
-/*
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:convert';
-
-// Scrap 클래스는 StatefulWidget으로, 스크랩 기능을 제공하는 화면을 구현합니다.
-class Scrap extends StatefulWidget {
-  const Scrap({Key? key}) : super(key: key);
-
-  @override
-  _ScrapState createState() => _ScrapState();
-}
-
-class _ScrapState extends State<Scrap> {
-  // 사용자가 스크랩한 내용을 저장하는 리스트입니다.
-  final List<Map<String, dynamic>> _scrapedContent = [];
-  // 사용자가 선택한 텍스트를 저장하는 변수입니다.
-  String? _selectedText;
-  // 뉴스 기사의 내용을 저장하는 변수입니다.
-  String _newsContent = '';
-  // 더미 데이터로 사용할 기사 제목입니다.
-  String _title = '';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadNewsContent();
-  }
-
-  // JSON 파일에서 데이터 불러오기
-  Future<void> _loadNewsContent() async {
-    String jsonString = await rootBundle.loadString('assets/news/dummy_news.json');
-    final Map<String, dynamic> newsData = jsonDecode(jsonString);
-
-    setState(() {
-      _title = newsData['title'];
-      _newsContent = newsData['content'];
-    });
-  }
-
-  // 사용자가 텍스트를 선택했을 때 팝업 메뉴를 표시하는 메서드입니다.
-  void _showPopupMenu(BuildContext context, Offset position) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-
-    if (_selectedText != null && _selectedText!.isNotEmpty) {
-      showMenu(
-        context: context,
-        position: RelativeRect.fromRect(
-          Rect.fromPoints(position, position),
-          Offset.zero & overlay.size,
-        ),
-        items: [
-          PopupMenuItem(
-            value: 'very_satisfied',
-            child: Row(
-              children: [
-                Icon(Icons.sentiment_very_satisfied),
-                SizedBox(width: 8),
-                Text('Very Satisfied'),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: 'satisfied',
-            child: Row(
-              children: [
-                Icon(Icons.sentiment_satisfied),
-                SizedBox(width: 8),
-                Text('Satisfied'),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: 'neutral',
-            child: Row(
-              children: [
-                Icon(Icons.sentiment_neutral),
-                SizedBox(width: 8),
-                Text('Neutral'),
-              ],
-            ),
-          ),
-          PopupMenuItem(
-            value: 'dissatisfied',
-            child: Row(
-              children: [
-                Icon(Icons.sentiment_dissatisfied),
-                SizedBox(width: 8),
-                Text('Dissatisfied'),
-              ],
-            ),
-          ),
-        ],
-      ).then((value) {
-        if (value != null) {
-          setState(() {
-            _scrapedContent.add({
-              'text': _selectedText!,
-              'reaction': value,
-            });
-            _selectedText = null;
-          });
-        }
-      });
-    }
-  }
-
-  // 이모티콘 반응에 따른 아이콘을 반환하는 메서드입니다.
-  Icon _getReactionIcon(String reaction) {
-    switch (reaction) {
-      case 'very_satisfied':
-        return Icon(Icons.sentiment_very_satisfied);
-      case 'satisfied':
-        return Icon(Icons.sentiment_satisfied);
-      case 'neutral':
-        return Icon(Icons.sentiment_neutral);
-      case 'dissatisfied':
-        return Icon(Icons.sentiment_dissatisfied);
-      default:
-        return Icon(Icons.sentiment_neutral);
+    if (response.statusCode == 201) {
+      // 요청이 성공적일 때
+      Navigator.pop(context); // 리스트 페이지로 돌아감
+    } else {
+      throw Exception('Failed to scrap article'); // 요청 실패 시 예외 처리
     }
   }
 
@@ -296,97 +176,46 @@ class _ScrapState extends State<Scrap> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Scrap News'),
+        title: Text(widget.article['title']), // 기사 제목 표시
       ),
-      body: _newsContent.isEmpty
-          ? Center(child: CircularProgressIndicator())
-          : Column(
+      body: Column(
         children: [
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: GestureDetector(
-                onTapDown: (TapDownDetails details) {
-                  _showPopupMenu(context, details.globalPosition);
-                },
-                child: SelectableText(
-                  _newsContent,
-                  showCursor: true,
-                  onSelectionChanged: (selection, cause) {
-                    setState(() {
-                      if (selection.start != -1 && selection.end != -1) {
-                        _selectedText = _newsContent.substring(selection.start, selection.end).trim();
-                      }
-                    });
-                  },
-                ),
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: _scrapedContent.isNotEmpty ? _showScrapResult : null,
-            child: Text('스크랩 하기'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // 스크랩 결과를 보여주는 메서드입니다.
-  void _showScrapResult() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          content: Container(
-            width: double.maxFinite,
             child: ListView(
+              padding: EdgeInsets.all(16.0),
               children: [
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      ..._scrapedContent.map((item) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text('• ${item['text']}')),
-                              _getReactionIcon(item['reaction']),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                    ],
+                GestureDetector(
+                  onTapDown: (TapDownDetails details) {
+                    _showPopupMenu(context, details.globalPosition); // 팝업 메뉴 표시
+                  },
+                  child: SelectableText(
+                    widget.article['content'], // 기사 내용 표시
+                    showCursor: true,
+                    onSelectionChanged: (selection, cause) {
+                      setState(() {
+                        if (selection.start != -1 && selection.end != -1) {
+                          _selectedText = widget.article['content']
+                              .substring(selection.start, selection.end)
+                              .trim(); // 선택된 텍스트 저장
+                        }
+                      });
+                    },
                   ),
                 ),
               ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('닫기'),
+          if (_isScrapButtonVisible)
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                onPressed: _scrapArticle, // 스크랩 버튼 클릭 시 서버에 데이터 전송
+                child: Text('스크랩 하기'),
+              ),
             ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 }
-*/
+

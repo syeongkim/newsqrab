@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class KingCrabSection extends StatelessWidget {
   // 더미 데이터: 각 이미지와 유저 이름을 리스트로 관리
   final List<Map<String, String>> userData = [
@@ -66,14 +65,7 @@ class KingCrabSection extends StatelessWidget {
               height: 80,
             ),
           ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          radius: 40, // 원하는 원형 크기
-          backgroundImage: AssetImage(imagePath),
-        ),
+        ],
       ),
     );
   }
