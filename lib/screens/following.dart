@@ -121,13 +121,13 @@ class _FollowingState extends State<Following> {
                         Text('${emojiCounts[index][0]}'),
                         SizedBox(width: 8),
                         IconButton(
-                          icon: Icon(Icons.sentiment_dissatisfied),
+                          icon: Icon(Icons.sentiment_satisfied),
                           onPressed: () => _incrementEmoji(index, 1),
                         ),
                         Text('${emojiCounts[index][1]}'),
                         SizedBox(width: 8),
                         IconButton(
-                          icon: Icon(Icons.sentiment_satisfied),
+                          icon: Icon(Icons.sentiment_dissatisfied),
                           onPressed: () => _incrementEmoji(index, 2),
                         ),
                         Text('${emojiCounts[index][2]}'),
