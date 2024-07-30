@@ -45,14 +45,7 @@ class KingCrabSection extends StatelessWidget {
           builder: (context) => AlertDialog(
             content: Image.asset(imagePath),
           ),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: CircleAvatar(
-          radius: 40, // 원하는 원형 크기
-          backgroundImage: AssetImage(imagePath),
-        ),
+        ],
       ),
     );
   }
