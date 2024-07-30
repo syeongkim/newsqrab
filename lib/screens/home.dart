@@ -50,12 +50,25 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Image.asset(
-            'assets/images/newsQrab.jpg',
-            height: kToolbarHeight - 8,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Image.asset(
+                'assets/images/newsQrab.jpg',
+                height: kToolbarHeight - 8,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Image.asset(
+                'assets/images/newsqrab_l.jpg',
+                height: kToolbarHeight - 8,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
