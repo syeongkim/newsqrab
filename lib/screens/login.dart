@@ -114,28 +114,30 @@ class _LoginState extends State<Login> {
       appBar: AppBar(title: Text('로그인')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _usernameController,
-              decoration: InputDecoration(labelText: '아이디'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: '비밀번호'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('로그인'),
-            ),
-            SizedBox(height: 10),
-            TextButton(
-              onPressed: _naverLogin,
-              child: Text('네이버로 로그인'),
-            ),
-          ],
+        child: SingleChildScrollView( //overflow 해결_Expanded 보다 SingleChildScrollView 선호
+          child: Column(
+            children: [
+              TextField(
+                controller: _usernameController,
+                decoration: InputDecoration(labelText: '아이디'),
+              ),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: '비밀번호'),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: Text('로그인'),
+              ),
+              SizedBox(height: 10),
+              TextButton(
+                onPressed: _naverLogin,
+                child: Text('네이버로 로그인'),
+              ),
+            ],
+          ),
         ),
       ),
     );

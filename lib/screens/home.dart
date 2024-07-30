@@ -49,36 +49,46 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Image.asset(
-                'assets/images/newsQrab.jpg',
-                height: kToolbarHeight - 8,
+      appBar: PreferredSize( // 기본 Appbar 대신 PreferredSize와 BoxDecoration을 사용하여 사용자 정의 상단 바를 생성. 이를 통해 스크롤 시 음영 효과가 사라짐
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          color: Colors.white, // AppBar 배경색을 흰색으로 설정
+          child: SafeArea(
+            child: Container(
+              color: Colors.white, // SafeArea 배경색을 흰색으로 설정
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Image.asset(
+                          'assets/images/newsQrab.jpg',
+                          height: kToolbarHeight - 8,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Image.asset(
+                          'assets/images/newsqrab_l.jpg',
+                          height: kToolbarHeight - 8,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    iconSize: 32.0, // 아이콘 크기를 32으로 설정
+                    icon: Icon(Icons.notifications),
+                    onPressed: () {
+                      _showNotifications(context);
+                    },
+                  ),
+                ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Image.asset(
-                'assets/images/newsqrab_l.jpg',
-                height: kToolbarHeight - 8,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            iconSize: 32.0, // 아이콘 크기를 30으로 설정
-            icon: Icon(Icons.notifications),
-            onPressed: () {
-              _showNotifications(context);
-            },
           ),
-        ],
+        ),
       ),
       body: IndexedStack(
         index: _selectedIndex,

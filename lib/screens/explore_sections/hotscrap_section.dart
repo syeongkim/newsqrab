@@ -7,11 +7,10 @@ class HotScrapSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Image.asset(
-            'assets/images/newsQrab.jpg',
-            width: 25.0, // 원하는 가로 크기로 변경
-            height: 25.0, // 원하는 세로 크기로 변경
-          ),
+          // leading: CircleAvatar(
+          //   radius: 12.5, // 원하는 원형 크기 (이미지 크기의 절반)
+          //   backgroundImage: AssetImage('assets/images/newsQrab.jpg'),
+          // ),
           title: Text(
             'Hottest Scraps',
             style: TextStyle(

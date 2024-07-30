@@ -46,7 +46,11 @@ class _FollowingState extends State<Following> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Following'),
+        // AppBar의 title을 제거
+        title: null,
+        // AppBar를 빈 공간으로 대체 (필요에 따라 preferredSize를 사용)
+        toolbarHeight: 0, // AppBar의 높이를 0으로 설정
+        elevation: 0, // 그림자 효과를 제거
       ),
       body: ListView.builder(
         itemCount: scrapData.length,
