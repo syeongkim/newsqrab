@@ -158,137 +158,144 @@ class _MyclipState extends State<Myclip> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        // AppBar의 title을 제거
         title: null,
-        // AppBar를 빈 공간으로 대체 (필요에 따라 preferredSize를 사용)
-        toolbarHeight: 0, // AppBar의 높이를 0으로 설정
-        elevation: 0, // 그림자 효과를 제거
+        toolbarHeight: 0,
+        elevation: 0,
       ),
-      body: ListView(
-        children: [
-          // 프로필 정보 섹션
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onLongPress: () => _editField('bio'),
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage('assets/images/crabi.png'),
-                    radius: 40,
-                  ),
-                ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onLongPress: () => _editField('nickname'),
-                        child: Text(
-                          nickname,
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      GestureDetector(
-                        onLongPress: () => _editField('bio'),
-                        child: Text(
-                          bio,
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+      body: Center(
+        child: Container(
+          margin: EdgeInsets.all(16),
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey[300],
+            borderRadius: BorderRadius.circular(20),
           ),
-          Divider(),
-          // 스크랩 항목 리스트뷰
-          ListView.builder(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            itemCount: scrapData.length,
-            itemBuilder: (context, index) {
-              final item = scrapData[index];
-              return GestureDetector(
-                onTap: () => _showDetailDialog(item),
-                onLongPress: () => _showDeleteDialog(index),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
+          child: ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onLongPress: () => _editField('bio'),
+                      child: CircleAvatar(
+                        backgroundImage: AssetImage('assets/images/crabi.png'),
+                        radius: 40,
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            item["scrapContent"],
-                            style: TextStyle(fontSize: 14),
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                item["scrapTime"],
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                              Icon(
-                                _getEmojiIcon(item["emoji"]),
-                                size: 14, // 이모지를 본문 텍스트 크기와 맞춤
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
                           GestureDetector(
-                            onTap: () async {
-                              final url = item["link"];
-                              if (await canLaunch(url)) {
-                                await launch(url);
-                              } else {
-                                throw 'Could not launch $url';
-                              }
-                            },
+                            onLongPress: () => _editField('nickname'),
                             child: Text(
-                              "원문보기",
-                              style: TextStyle(fontSize: 12, color: Colors.blue),
+                              nickname,
+                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                             ),
                           ),
-                          Divider(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildReactionIcon(
-                                Icons.sentiment_very_satisfied,
-                                item["reactions"]["sentiment_very_satisfied"],
-                              ),
-                              _buildReactionIcon(
-                                Icons.sentiment_satisfied,
-                                item["reactions"]["sentiment_satisfied"],
-                              ),
-                              _buildReactionIcon(
-                                Icons.sentiment_dissatisfied,
-                                item["reactions"]["sentiment_dissatisfied"],
-                              ),
-                              _buildReactionIcon(
-                                Icons.sentiment_very_dissatisfied,
-                                item["reactions"]["sentiment_very_dissatisfied"],
-                              ),
-                            ],
+                          SizedBox(height: 4),
+                          GestureDetector(
+                            onLongPress: () => _editField('bio'),
+                            child: Text(
+                              bio,
+                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
                           ),
                         ],
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              );
-            },
+              ),
+              Divider(),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: scrapData.length,
+                itemBuilder: (context, index) {
+                  final item = scrapData[index];
+                  return GestureDetector(
+                    onTap: () => _showDetailDialog(item),
+                    onLongPress: () => _showDeleteDialog(index),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item["scrapContent"],
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    item["scrapTime"],
+                                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                                  ),
+                                  Icon(
+                                    _getEmojiIcon(item["emoji"]),
+                                    size: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () async {
+                                  final url = item["link"];
+                                  if (await canLaunch(url)) {
+                                    await launch(url);
+                                  } else {
+                                    throw 'Could not launch $url';
+                                  }
+                                },
+                                child: Text(
+                                  "원문보기",
+                                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                                ),
+                              ),
+                              Divider(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                children: [
+                                  _buildReactionIcon(
+                                    Icons.sentiment_very_satisfied,
+                                    item["reactions"]["sentiment_very_satisfied"],
+                                  ),
+                                  _buildReactionIcon(
+                                    Icons.sentiment_satisfied,
+                                    item["reactions"]["sentiment_satisfied"],
+                                  ),
+                                  _buildReactionIcon(
+                                    Icons.sentiment_dissatisfied,
+                                    item["reactions"]["sentiment_dissatisfied"],
+                                  ),
+                                  _buildReactionIcon(
+                                    Icons.sentiment_very_dissatisfied,
+                                    item["reactions"]["sentiment_very_dissatisfied"],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
