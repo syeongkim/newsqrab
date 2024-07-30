@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 
+
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -111,32 +112,59 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('로그인')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView( //overflow 해결_Expanded 보다 SingleChildScrollView 선호
-          child: Column(
-            children: [
-              TextField(
-                controller: _usernameController,
-                decoration: InputDecoration(labelText: '아이디'),
+      appBar: AppBar(
+        backgroundColor: Colors.white, //배경색 흰색
+        title: Row(
+          children: [
+            Image.asset('assets/images/newsQrab.jpg',height: 40),
+            SizedBox(width: 10),
+            Image.asset('assets/images/newsqrab_l.jpg',height: 40),
+            SizedBox(width: 10),
+            Text('로그인'),
+              ],
+            ),
+        ),
+      body: Container(
+        color: Colors.white, // body의 배경색을 흰색으로 설정
+        child: Center(
+          child: SingleChildScrollView( // overflow 해결_Expanded 보다 SingleChildScrollView 선호
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.grey[300], // 회색 배경색
+                  borderRadius: BorderRadius.circular(30), // 둥근 정도
+                ),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(labelText: '아이디'),
+                    ),
+                    TextField(
+                      controller: _passwordController,
+                      decoration: InputDecoration(labelText: '비밀번호'),
+                      obscureText: true,
+                    ),
+                    SizedBox(height: 20),
+                    SizedBox(
+                      width: 200,
+                      child: ElevatedButton(
+                        onPressed: _login,
+                        child: Text('로그인'),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: _naverLogin,
+                      child: Image.asset('assets/images/naverlogin.png',height:50),
+                    ),
+                  ],
+                ),
               ),
-              TextField(
-                controller: _passwordController,
-                decoration: InputDecoration(labelText: '비밀번호'),
-                obscureText: true,
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _login,
-                child: Text('로그인'),
-              ),
-              SizedBox(height: 10),
-              TextButton(
-                onPressed: _naverLogin,
-                child: Text('네이버로 로그인'),
-              ),
-            ],
+            ),
           ),
         ),
       ),
