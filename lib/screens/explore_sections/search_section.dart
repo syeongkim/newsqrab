@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:newsqrap/services/naver_search_service.dart';
 
 class SearchSection extends StatefulWidget {
+  const SearchSection({super.key});
+
   @override
   _SearchSectionState createState() => _SearchSectionState();
 }
@@ -39,23 +41,23 @@ class _SearchSectionState extends State<SearchSection> {
     return Column(
       children: [
         Padding(
-          padding: EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
               Expanded(
                 child: TextField(
                   controller: _controller,
-                  decoration: InputDecoration(hintText: '검색어를 입력하세요'),
+                  decoration: const InputDecoration(hintText: '검색어를 입력하세요'),
                 ),
               ),
               IconButton(
-                icon: Icon(Icons.search),
+                icon: const Icon(Icons.search),
                 onPressed: _search,
               ),
             ],
           ),
         ),
-        if (_isLoading) CircularProgressIndicator(),
+        if (_isLoading) const CircularProgressIndicator(),
         if (_error != null) Text(_error!),
         if (_results.isNotEmpty)
           Expanded(
@@ -69,7 +71,7 @@ class _SearchSectionState extends State<SearchSection> {
               },
             ),
           ),
-        if (!_isLoading && _results.isEmpty && _error == null) Text('검색 결과가 없습니다'),
+        if (!_isLoading && _results.isEmpty && _error == null) const Text('검색 결과가 없습니다'),
       ],
     );
   }

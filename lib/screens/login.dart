@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 
 class Login extends StatefulWidget {
+  const Login({super.key});
+
   @override
   _LoginState createState() => _LoginState();
 }
@@ -13,8 +15,8 @@ class _LoginState extends State<Login> {
   void _login() {
     // 로그인 로직 구현 (API 호출 등)
     // 로그인 성공 시 메인 화면으로 이동
-    if (!_usernameController.text.isEmpty &&
-        !_passwordController.text.isEmpty) {
+    if (_usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
       if (_usernameController.text == "test" &&
           _passwordController.text == "1234") {
         Navigator.pushReplacementNamed(context, '/home');
@@ -23,8 +25,8 @@ class _LoginState extends State<Login> {
           context: context,
           builder: (context) {
             return AlertDialog(
-              title: Text('로그인 실패'),
-              content: Text('아이디 또는 비밀번호가 일치하지 않습니다.'),
+              title: const Text('로그인 실패'),
+              content: const Text('아이디 또는 비밀번호가 일치하지 않습니다.'),
               actions: <Widget>[
                 Column(
                   mainAxisSize: MainAxisSize.min, // 컬럼의 크기를 내용물 크기에 맞춤
@@ -34,7 +36,7 @@ class _LoginState extends State<Login> {
                       onPressed: () {
                         Navigator.pop(context); // 현재 대화 상자를 닫습니다.
                       },
-                      child: Text('확인'),
+                      child: const Text('확인'),
                     ),
                     TextButton(
                       onPressed: () {
@@ -42,7 +44,7 @@ class _LoginState extends State<Login> {
                         Navigator.pushNamed(
                             context, '/signup'); // 회원가입 페이지로 이동합니다.
                       },
-                      child: Text('회원가입'),
+                      child: const Text('회원가입'),
                     ),
                   ],
                 ),
@@ -61,7 +63,7 @@ class _LoginState extends State<Login> {
       final NaverAccountResult account =
           await FlutterNaverLogin.currentAccount();
 
-      print('로그인 성공: ${account}'); // 사용자 이메일 정보 출력
+      print('로그인 성공: $account'); // 사용자 이메일 정보 출력
       if (result.status == NaverLoginStatus.loggedIn) {
         if (account.id == "JE3Nx5Ex9e2vRncn5c-JxXzY6hlVjCwM-GGqd6BZq1I") {
           // 네이버 로그인 성공 시
@@ -73,8 +75,8 @@ class _LoginState extends State<Login> {
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: Text('로그인 실패'),
-                content: Text('아이디 또는 비밀번호가 일치하지 않습니다.'),
+                title: const Text('로그인 실패'),
+                content: const Text('아이디 또는 비밀번호가 일치하지 않습니다.'),
                 actions: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.min, // 컬럼의 크기를 내용물 크기에 맞춤
@@ -84,7 +86,7 @@ class _LoginState extends State<Login> {
                         onPressed: () {
                           Navigator.pop(context); // 현재 대화 상자를 닫습니다.
                         },
-                        child: Text('확인'),
+                        child: const Text('확인'),
                       ),
                       TextButton(
                         onPressed: () {
@@ -92,7 +94,7 @@ class _LoginState extends State<Login> {
                           Navigator.pushNamed(
                               context, '/signupNaver'); // 회원가입 페이지로 이동합니다.
                         },
-                        child: Text('회원가입'),
+                        child: const Text('회원가입'),
                       ),
                     ],
                   ),
@@ -111,29 +113,29 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('로그인')),
+      appBar: AppBar(title: const Text('로그인')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
               controller: _usernameController,
-              decoration: InputDecoration(labelText: '아이디'),
+              decoration: const InputDecoration(labelText: '아이디'),
             ),
             TextField(
               controller: _passwordController,
-              decoration: InputDecoration(labelText: '비밀번호'),
+              decoration: const InputDecoration(labelText: '비밀번호'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _login,
-              child: Text('로그인'),
+              child: const Text('로그인'),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             TextButton(
               onPressed: _naverLogin,
-              child: Text('네이버로 로그인'),
+              child: const Text('네이버로 로그인'),
             ),
           ],
         ),

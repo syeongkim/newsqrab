@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Scrap extends StatelessWidget {
-  const Scrap({Key? key}) : super(key: key);
+  const Scrap({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text('Scrap Tab'),
     );
   }

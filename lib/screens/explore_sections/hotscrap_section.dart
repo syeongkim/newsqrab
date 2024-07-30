@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class HotScrapSection extends StatelessWidget {
+  const HotScrapSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -8,9 +10,9 @@ class HotScrapSection extends StatelessWidget {
       children: [
         ListTile(
           leading: Image.asset('assets/images/newsQrab.jpg'),
-          title: Text('Hottest Scarps'),
+          title: const Text('Hottest Scarps'),
         ),
-        Container(
+        SizedBox(
           height: 150,
           child: ListView(
             children: [

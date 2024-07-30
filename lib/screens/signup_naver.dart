@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 
 class SignupNaver extends StatefulWidget {
+  const SignupNaver({super.key});
+
   @override
   _SignupNaverState createState() => _SignupNaverState();
 }
@@ -30,14 +32,14 @@ class _SignupNaverState extends State<SignupNaver> {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text('Error'),
-          content: Text('Please fill nickname correctly.'),
+          title: const Text('Error'),
+          content: const Text('Please fill nickname correctly.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: const Text('OK'),
             ),
           ],
         ),
@@ -54,31 +56,31 @@ class _SignupNaverState extends State<SignupNaver> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('회원가입'),
+        title: const Text('회원가입'),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: <Widget>[
             TextField(
               controller: _nicknameController,
-              decoration: InputDecoration(labelText: 'Nickname'),
+              decoration: const InputDecoration(labelText: 'Nickname'),
             ),
             if (_profileImage != null)
               Image.file(_profileImage!, width: 100, height: 100),
             ElevatedButton(
               onPressed: _pickImage,
-              child: Text('Upload Profile Picture'),
+              child: const Text('Upload Profile Picture'),
             ),
             TextField(
               controller: _bioController,
-              decoration: InputDecoration(labelText: 'Bio'),
+              decoration: const InputDecoration(labelText: 'Bio'),
               maxLines: 3,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _signup,
-              child: Text('Sign Up'),
+              child: const Text('Sign Up'),
             ),
           ],
         ),

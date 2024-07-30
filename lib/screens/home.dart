@@ -6,6 +6,8 @@ import 'reels.dart';
 import 'myclip.dart';
 
 class Home extends StatefulWidget {
+  const Home({super.key});
+
   @override
   _HomeState createState() => _HomeState();
 }
@@ -13,11 +15,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
   final List<Widget> _pages = [
-    Following(), // Following 탭
-    Explore(), // Explore 탭
-    Scrap(), // Scrap 탭
-    Reels(), // Reels 탭
-    Myclip(), // My Clip 탭
+    const Following(), // Following 탭
+    const Explore(), // Explore 탭
+    const Scrap(), // Scrap 탭
+    const Reels(), // Reels 탭
+    const Myclip(), // My Clip 탭
   ];
 
   void _onItemTapped(int index) {
@@ -31,11 +33,11 @@ class _HomeState extends State<Home> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('알림'),
-          content: Text('여기에 알림 내용이 표시됩니다.'),
+          title: const Text('알림'),
+          content: const Text('여기에 알림 내용이 표시됩니다.'),
           actions: <Widget>[
             TextButton(
-              child: Text('닫기'),
+              child: const Text('닫기'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -60,7 +62,7 @@ class _HomeState extends State<Home> {
         actions: [
           IconButton(
             iconSize: 32.0, // 아이콘 크기를 30으로 설정
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             onPressed: () {
               _showNotifications(context);
             },

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Reels extends StatelessWidget {
-  const Reels({Key? key}) : super(key: key);
+  const Reels({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text('Reels Tab'),
     );
   }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Following extends StatelessWidget {
-  const Following({Key? key}) : super(key: key);
+  const Following({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text('Following Tab'),
     );
   }

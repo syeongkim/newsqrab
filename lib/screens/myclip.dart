@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Myclip extends StatelessWidget {
-  const Myclip({Key? key}) : super(key: key);
+  const Myclip({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    return const Center(
       child: Text('Myclip Tab'),
     );
   }

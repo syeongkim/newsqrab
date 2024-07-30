@@ -4,7 +4,7 @@ import 'explore_sections/kingcrab_section.dart';
 import 'explore_sections/search_section.dart';
 
 class Explore extends StatelessWidget {
-  const Explore({Key? key}) : super(key: key);
+  const Explore({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,9 +14,9 @@ class Explore extends StatelessWidget {
           SliverList(
             delegate: SliverChildListDelegate(
               [
-                SearchSection(), // 검색 섹션
-                KingCrabSection(), // 킹크랩 섹션
-                HotScrapSection(), // 핫스크랩 섹션
+                const SearchSection(), // 검색 섹션
+                const KingCrabSection(), // 킹크랩 섹션
+                const HotScrapSection(), // 핫스크랩 섹션
               ],
             ),
           ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class KingCrabSection extends StatelessWidget {
+  const KingCrabSection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -8,9 +10,9 @@ class KingCrabSection extends StatelessWidget {
       children: [
         ListTile(
           leading: Image.asset('assets/images/newsQrab.jpg'),
-          title: Text('Popular KingCrab'),
+          title: const Text('Popular KingCrab'),
         ),
-        Container(
+        SizedBox(
           height: 150,
           child: ListView(
             scrollDirection: Axis.horizontal,
