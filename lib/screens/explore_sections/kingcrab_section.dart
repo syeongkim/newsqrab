@@ -9,10 +9,18 @@ class KingCrabSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ListTile(
-          leading: Image.asset('assets/images/newsQrab.jpg'),
-          title: const Text('Popular KingCrab'),
+          // leading: CircleAvatar(
+          //   radius: 12.5, // 원하는 원형 크기 (이미지 크기의 절반)
+          //   backgroundImage: AssetImage('assets/images/newsQrab.jpg'),
+          // ),
+          title: Text(
+            'Popular KingCrab',
+            style: TextStyle(
+              fontSize: 20.0, // 원하는 글자 크기
+            ),
+          ),
         ),
-        SizedBox(
+        Container(
           height: 150,
           child: ListView(
             scrollDirection: Axis.horizontal,
@@ -41,8 +49,12 @@ class KingCrabSection extends StatelessWidget {
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Image.asset(imagePath),
+        child: CircleAvatar(
+          radius: 40, // 원하는 원형 크기
+          backgroundImage: AssetImage(imagePath),
+        ),
       ),
     );
   }
 }
+

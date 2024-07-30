@@ -3,6 +3,7 @@ import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/signup.dart';
 import 'screens/signup_naver.dart';
+import 'screens/loadinglogin.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const Login(), // 로그인 화면을 첫 화면으로 설정
+      home: LoadingLogin(), // 로그인 화면을 첫 화면으로 설정
       routes: {
         '/home': (context) => const Home(), // 메인 화면을 위한 라우트 설정
         '/login': (context) => const Login(), // 로그인 화면을 위한 라우트 설정
