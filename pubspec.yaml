@@ -32,7 +32,6 @@ dependencies:
     sdk: flutter
   flutter_naver_login: ^1.6.0
   image_picker: ^0.8.5+3
-  url_launcher: ^6.0.12
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
