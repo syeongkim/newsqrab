@@ -9,20 +9,34 @@ class Following extends StatefulWidget {
 }
 
 class _FollowingState extends State<Following> {
-  final List<Map<String, String>> scrapData = const [
+  final List<Map<String, dynamic>> scrapData = [
     {
       "profileName": "크랩이",
       "scrapContent": "\"시원하네\" 한국 남자 양궁 단체, 현격한 기량 차이 꺾고 4강 진출. 일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
       "scrapTime": "2024.7.29 10:00 PM",
       "link": "https://www.fnnews.com/news/202407292153475630",
-      "profileImage": "assets/images/crabi.png"
+      "profileImage": "assets/images/crabi.png",
+      "emoji": "sentiment_very_satisfied",
+      "reactions": {
+        "sentiment_very_satisfied": 0,
+        "sentiment_satisfied": 0,
+        "sentiment_dissatisfied": 0,
+        "sentiment_very_dissatisfied": 1,
+      }
     },
     {
       "profileName": "크랩이3678abc",
       "scrapContent": "\"시원하네\" 한국 남자 양궁 단체, 현격한 기량 차이 꺾고 4강 진출. 일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
       "scrapTime": "2024.7.29 10:00 PM",
       "link": "https://www.fnnews.com/news/202407292153475630",
-      "profileImage": "assets/images/newsQrab.jpg"
+      "profileImage": "assets/images/newsQrab.jpg",
+      "emoji": "sentiment_very_dissatisfied",
+      "reactions": {
+        "sentiment_very_satisfied": 0,
+        "sentiment_satisfied": 1,
+        "sentiment_dissatisfied": 0,
+        "sentiment_very_dissatisfied": 0,
+      }
     }
   ];
 
@@ -33,13 +47,33 @@ class _FollowingState extends State<Following> {
   void initState() {
     super.initState();
     // 각 스크랩에 대해 이모티콘 카운트 초기화
-    emojiCounts = List.generate(scrapData.length, (index) => [0, 0, 0, 0]);
+    emojiCounts = List.generate(scrapData.length, (index) => [
+      scrapData[index]["reactions"]["sentiment_very_satisfied"] as int,
+      scrapData[index]["reactions"]["sentiment_satisfied"] as int,
+      scrapData[index]["reactions"]["sentiment_dissatisfied"] as int,
+      scrapData[index]["reactions"]["sentiment_very_dissatisfied"] as int,
+    ]);
   }
 
   void _incrementEmoji(int scrapIndex, int emojiIndex) {
     setState(() {
       emojiCounts[scrapIndex][emojiIndex]++;
     });
+  }
+
+  IconData _getEmojiIcon(String emoji) {
+    switch (emoji) {
+      case "sentiment_very_satisfied":
+        return Icons.sentiment_very_satisfied;
+      case "sentiment_satisfied":
+        return Icons.sentiment_satisfied;
+      case "sentiment_dissatisfied":
+        return Icons.sentiment_dissatisfied;
+      case "sentiment_very_dissatisfied":
+        return Icons.sentiment_very_dissatisfied;
+      default:
+        return Icons.sentiment_neutral;
+    }
   }
 
   @override
@@ -61,7 +95,8 @@ class _FollowingState extends State<Following> {
           final profileName = item["profileName"] ?? 'Unknown';
           final scrapContent = item["scrapContent"] ?? 'No content available';
           final scrapTime = item["scrapTime"] ?? 'Unknown time';
-          final link = item["link"];
+          final link = item["link"] ?? '';
+          final emoji = item["emoji"] ?? 'sentiment_neutral';
 
           return Padding(
             padding: const EdgeInsets.all(8.0),
@@ -90,15 +125,25 @@ class _FollowingState extends State<Following> {
                       style: TextStyle(fontSize: 14),
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      scrapTime,
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          scrapTime,
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                        Icon(
+                          _getEmojiIcon(emoji),
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ],
                     ),
                     SizedBox(height: 8),
                     GestureDetector(
                       onTap: () async {
-                        if (link != null && await canLaunch(link)) {
-                          await launch(link);
+                        if (link.isNotEmpty && await canLaunchUrl(Uri.parse(link))) {
+                          await launchUrl(Uri.parse(link));
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Could not launch $link')),
@@ -106,32 +151,30 @@ class _FollowingState extends State<Following> {
                         }
                       },
                       child: Text(
-                        link ?? 'No link available',
+                        '원문보기',
                         style: TextStyle(fontSize: 12, color: Colors.blue),
                       ),
                     ),
                     SizedBox(height: 8),
                     // 이모티콘 섹션 추가
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         IconButton(
                           icon: Icon(Icons.sentiment_very_satisfied),
                           onPressed: () => _incrementEmoji(index, 0),
                         ),
                         Text('${emojiCounts[index][0]}'),
-                        SizedBox(width: 8),
                         IconButton(
                           icon: Icon(Icons.sentiment_satisfied),
                           onPressed: () => _incrementEmoji(index, 1),
                         ),
                         Text('${emojiCounts[index][1]}'),
-                        SizedBox(width: 8),
                         IconButton(
                           icon: Icon(Icons.sentiment_dissatisfied),
                           onPressed: () => _incrementEmoji(index, 2),
                         ),
                         Text('${emojiCounts[index][2]}'),
-                        SizedBox(width: 8),
                         IconButton(
                           icon: Icon(Icons.sentiment_very_dissatisfied),
                           onPressed: () => _incrementEmoji(index, 3),

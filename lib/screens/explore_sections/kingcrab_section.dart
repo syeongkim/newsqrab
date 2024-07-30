@@ -45,9 +45,19 @@ class KingCrabSection extends StatelessWidget {
           builder: (context) => AlertDialog(
             content: Image.asset(imagePath),
           ),
-        ],
+        );
+      },
+      child: Container(
+        width: 100,
+        margin: EdgeInsets.symmetric(horizontal: 5.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          image: DecorationImage(
+            image: AssetImage(imagePath),
+            fit: BoxFit.cover,
+          ),
+        ),
       ),
     );
   }
 }
-
