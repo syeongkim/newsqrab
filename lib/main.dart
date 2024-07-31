@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'screens/login.dart';
 import 'screens/home.dart';
 import 'screens/signup.dart';
 import 'screens/signup_naver.dart';
 import 'screens/loadinglogin.dart';
+import 'services/user_provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
