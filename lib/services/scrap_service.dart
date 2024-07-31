@@ -54,4 +54,17 @@ class ScrapService {
       throw Exception('Failed to update emoji');
     }
   }
+
+  // 인기 많은 스크랩 데이터를 가져오는 메서드 추가
+  Future<List<dynamic>> fetchHotScraps() async {
+    final String url = '$baseUrl/hot';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to load hot scraps');
+    }
+  }
 }
