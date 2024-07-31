@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HotScrapSection extends StatelessWidget {
-  final List<Map<String, dynamic>> scrapData = [
+  final List<Map<String, dynamic>> scrapData = const [
     {
       'title': '사이언비티' '한국 남자 영국 대체, 현장한 기란 자이 국내 4강 진출',
       'description':
@@ -134,14 +134,113 @@ class HotScrapSection extends StatelessWidget {
                 item['reactions']['sentiment_very_dissatisfied'],
               ),
             ],
-          )
+          ),
         ],
       ),
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            content: Text('${item['title']}의 상세 정보'),
+        _showPopup(context, item);
+      },
+    );
+  }
+
+  void _showPopup(BuildContext context, Map<String, dynamic> item) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[200], // 팝업 배경 색상 회색
+          contentPadding: EdgeInsets.all(0),
+          content: Container(
+            width: 300,
+            padding: EdgeInsets.all(10),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundImage: AssetImage(item['profileImage']),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        item['profileName'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                ),
+                SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 4,
+                        offset: Offset(0, 2), // changes position of shadow
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.all(10),
+                  child: Text(
+                    item['scrapContent'],
+                    style: TextStyle(fontWeight: FontWeight.normal),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Align(
+                  alignment: Alignment.centerLeft, // 시간 왼쪽 정렬
+                  child: Text(
+                    item['scrapTime'],
+                    style: TextStyle(
+                      color: Colors.grey, // 시간 텍스트 색상 회색으로 설정
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.sentiment_very_satisfied),
+                      onPressed: () {},
+                    ),
+                    Text('${item['emojis']['smilecrying']}'),
+                    SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.sentiment_satisfied),
+                      onPressed: () {},
+                    ),
+                    Text('${item['emojis']['crying']}'),
+                    SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.sentiment_dissatisfied),
+                      onPressed: () {},
+                    ),
+                    Text('${item['emojis']['smile']}'),
+                    SizedBox(width: 8),
+                    IconButton(
+                      icon: Icon(Icons.sentiment_very_dissatisfied),
+                      onPressed: () {},
+                    ),
+                    Text('${item['emojis']['angry']}'),
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
