@@ -322,7 +322,7 @@ class _MyclipState extends State<Myclip> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  item["title"] ?? 'No Content',
+                                  item["highlightedText"] ?? 'No Content',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                                 SizedBox(height: 8),
