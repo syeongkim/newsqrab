@@ -149,14 +149,7 @@ class _HomeState extends State<Home> {
                       Padding(
                         padding: const EdgeInsets.only(left: 16.0, right: 8.0), // 왼쪽 패딩 추가
                         child: Image.asset(
-                          'assets/images/newsQrab.jpg',
-                          height: kToolbarHeight - 8,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Image.asset(
-                          'assets/images/newsqrab_l.jpg',
+                          'assets/images/tabbar.png',
                           height: kToolbarHeight - 8,
                         ),
                       ),

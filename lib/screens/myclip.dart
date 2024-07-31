@@ -12,48 +12,63 @@ class Myclip extends StatefulWidget {
 }
 
 class _MyclipState extends State<Myclip> {
-  String bio = "나는 mz경제전문가"; // 기본 bio 설정
+  String bio = ""; // 기본 bio 설정
   String nickname = ""; // 기본 닉네임 설정
   List<Map<String, dynamic>> scrapData = []; // 스크랩 데이터 리스트
-
-  final List<Map<String, String>> followingList = [
-    {"name": "김예락", "profilePic": 'assets/images/crabi.png'},
-    {"name": "김서영", "profilePic": 'assets/images/crabi.png'},
-    {"name": "박영민", "profilePic": 'assets/images/crabi.png'},
-  ];
-
-  final List<Map<String, String>> followerList = [
-    {"name": "김예락", "profilePic": 'assets/images/crabi.png'},
-    {"name": "김서영", "profilePic": 'assets/images/crabi.png'},
-    {"name": "박영민", "profilePic": 'assets/images/crabi.png'},
-  ];
-
-  // 추가된 상태 관리용 변수
-  Map<String, bool> followingState = {
-    "김예락": true,
-    "김서영": true,
-    "박영민": true,
-  };
-
-  Map<String, bool> followerState = {
-    "김예락": true,
-    "김서영": true,
-    "박영민": true,
-  };
+  List<Map<String, String>> followingList = []; // 팔로잉 리스트
+  List<Map<String, String>> followerList = []; // 팔로워 리스트
 
   @override
   void initState() {
     super.initState();
-    _fetchUserNickname(); // 사용자 닉네임 불러오기
+    print('initState called');
+    _loadUserData();
+    // _fetchUserNickname(); // 사용자 닉네임 불러오기
     _fetchScrapData(); // 스크랩 데이터 불러오기
   }
 
-  // 사용자 닉네임을 provider에서 가져오는 함수
-  void _fetchUserNickname() {
-    final userProvider = context.read<UserProvider>();
-    setState(() {
-      nickname = userProvider.nickname ?? "Hello Crabi"; //기본값을 사용하여 null 가능성 제거
-    });
+  // // 사용자 닉네임을 provider에서 가져오는 함수
+  // void _fetchUserNickname() {
+  //   final userProvider = context.read<UserProvider>();
+  //   setState(() {
+  //     nickname = userProvider.nickname ?? "Hello Crabi"; //기본값을 사용하여 null 가능성 제거
+  //   });
+  // }
+
+  // 사용자 데이터를 서버에서 가져오는 함수
+  Future<void> _loadUserData() async {
+    try {
+      final userProvider = context.read<UserProvider>();
+      final userId = userProvider.userId;
+
+      if (userId == null) {
+        // userId가 null인 경우의 처리
+        print('User ID is null');
+        return;
+      }
+
+      final userData = await ScrapService().fetchUserById(userId);
+      print(userData);
+      setState(() {
+        bio = userData['bio'] ?? "No bio available";
+        nickname = userData['nickname'] ?? "No nickname available";
+        followingList = (userData['following'] as List<dynamic>?)?.map<Map<String, String>>((follower) {
+          return {
+            "name": follower['name'] as String,
+            "profilePic": follower['profilePic'] as String? ?? 'assets/images/default.png',
+          };
+        }).toList() ?? [];
+        followerList = (userData['followers'] as List<dynamic>?)?.map<Map<String, String>>((follower) {
+          return {
+            "name": follower['name'] as String,
+            "profilePic": follower['profilePic'] as String? ?? 'assets/images/default.png',
+          };
+        }).toList() ?? [];
+      });
+
+    } catch (e) {
+      print('Error fetching user data: $e');
+    }
   }
 
   // 스크랩 데이터를 서버에서 가져오는 함수
@@ -193,18 +208,6 @@ class _MyclipState extends State<Myclip> {
     }
   }
 
-  // 상태를 토글하는 함수
-  void _toggleFollowingState(String name) {
-    setState(() {
-      followingState[name] = !(followingState[name] ?? false);
-    });
-  }
-
-  void _toggleFollowerState(String name) {
-    setState(() {
-      followerState[name] = !(followerState[name] ?? false);
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -363,82 +366,18 @@ class _MyclipState extends State<Myclip> {
                       ],
                     ),
                   ),
-                  Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '팔로잉 목록',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: followingList.length, // 팔로잉 목록 개수
-                          itemBuilder: (context, index) {
-                            final user = followingList[index];
-                            final isFollowing = followingState[user["name"] ?? ""] ?? false;
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
-                              ),
-                              title: Text(user["name"] ?? 'No Name'),
-                              trailing: GestureDetector(
-                                onTap: () => _toggleFollowingState(user["name"] ?? ""),
-                                child: Icon(
-                                  isFollowing ? Icons.check : Icons.add,
-                                  color: isFollowing ? Colors.green : Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '팔로워 목록',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemCount: followerList.length, // 팔로워 목록 개수
-                          itemBuilder: (context, index) {
-                            final user = followerList[index];
-                            final isFollower = followerState[user["name"] ?? ""] ?? false;
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
-                              ),
-                              title: Text(user["name"] ?? 'No Name'),
-                              trailing: GestureDetector(
-                                onTap: () => _toggleFollowerState(user["name"] ?? ""),
-                                child: Icon(
-                                  isFollower ? Icons.check : Icons.add,
-                                  color: isFollower ? Colors.green : Colors.grey,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+
+
+
                 ],
               ),
             ),
           ],
         ),
       ),
+
+
+
     );
   }
 }

@@ -55,6 +55,19 @@ class ScrapService {
     }
   }
 
+    // GET /users/{id} API를 호출하는 메서드 추가
+  Future<Map<String, dynamic>> fetchUserById(String userId) async {
+    final String url = 'http://175.106.98.197:3000/users/$userId';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load user data');
+    }
+  }
+  
   // 인기 많은 스크랩 데이터를 가져오는 메서드 추가
   Future<List<dynamic>> fetchHotScraps() async {
     final String url = '$baseUrl/hot';
