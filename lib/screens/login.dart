@@ -116,29 +116,40 @@ class _LoginState extends State<Login> {
 
       print('로그인 성공: $account'); // 사용자 이메일 정보 출력
       if (result.status == NaverLoginStatus.loggedIn) {
-        if (account.id == "JE3Nx5Ex9e2vRncn5c-JxXzY6hlVjCwM-GGqd6BZq1I") {
-          // 네이버 로그인 성공 시
-          print("go to home");
-          Navigator.pushReplacementNamed(context, '/home'); // 홈 화면으로 이동
+        const apiUrl = 'http://175.106.98.197:3000/users/login';
+
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'username': account.id}),
+        );
+
+        if (response.statusCode == 200) {
+          // 로그인 성공
+          final responseData = jsonDecode(response.body);
+          print('Login successful with username: ${_usernameController.text}');
+
+          // UserProvider에 사용자 정보 저장
+          Provider.of<UserProvider>(context, listen: false).setUser(
+            responseData['_id'],
+            responseData['username'],
+            responseData['nickname'],
+          );
+
+          Navigator.pushReplacementNamed(context, '/home');
         } else {
           print("fail to login");
           showDialog(
             context: context,
             builder: (context) {
               return AlertDialog(
-                title: const Text('로그인 실패'),
-                content: const Text('아이디 또는 비밀번호가 일치하지 않습니다.'),
+                title: const Text('회원가입 필요'),
+                content: const Text('신규 유저는 회원가입이 필요합니다.'),
                 actions: <Widget>[
                   Column(
                     mainAxisSize: MainAxisSize.min, // 컬럼의 크기를 내용물 크기에 맞춤
                     mainAxisAlignment: MainAxisAlignment.center, // 아이템들을 센터 정렬
                     children: <Widget>[
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // 현재 대화 상자를 닫습니다.
-                        },
-                        child: const Text('확인'),
-                      ),
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // 로그인 실패 대화 상자를 닫습니다.

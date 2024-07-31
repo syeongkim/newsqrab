@@ -231,7 +231,7 @@ class _SignupState extends State<Signup> {
                         onPressed: _pickImage,
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                              Color(0xFFE65C5C), // 버튼의 배경색을 #E65C5C로 설정
+                              Colors.grey, // 버튼의 배경색을 #E65C5C로 설정
                           shape: RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.circular(2), // 모서리를 각진 사각형으로 설정
