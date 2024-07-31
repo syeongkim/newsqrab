@@ -72,12 +72,12 @@ class _FollowingState extends State<Following> {
         itemBuilder: (context, index) {
           final item = scrapData[index];
           final profileImage = item["profileImage"] ?? 'assets/images/default.png';
-          final profileName = item["profileName"] ?? 'Unknown';
-          final scrapContent = item["scrapContent"] ?? 'No content available';
+          final profileName = item["usernickname"] ?? 'Unknown';
+          final scrapContent = item["highlightedText"] ?? 'No content available';
           final scrapTime = item["createdAt"] ?? 'Unknown time'; // createdAt 필드 사용
           final link = item["url"] ?? ''; // url 필드 사용
-          final emoji = item["emoji"] ?? 'sentiment_neutral';
-          final reactions = item["reactions"] ?? {};
+          final emoji = item["myemoji"] ?? 'sentiment_neutral';
+          final reactions = item["folloewEmojis"] ?? {};
 
           return Padding(
             padding: const EdgeInsets.all(8.0),

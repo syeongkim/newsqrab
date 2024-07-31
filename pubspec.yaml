@@ -34,6 +34,7 @@ dependencies:
   flutter_naver_login: ^1.6.0
   image_picker: ^0.8.5+3
   video_player: ^2.2.11
+  badges: ^3.0.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
