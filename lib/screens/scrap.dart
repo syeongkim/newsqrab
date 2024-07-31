@@ -20,7 +20,7 @@ class _ScrapState extends State<Scrap> {
 
   Future<void> _fetchArticles() async {
     // API로부터 기사를 가져오는 비동기 메서드
-    final response = await http.get(Uri.parse('http://10.40.0.130:3000/articles')); // 백엔드 API 호출
+    final response = await http.get(Uri.parse('http://143.248.195.18:3000/articles')); // 백엔드 API 호출
     if (response.statusCode == 200) {
       // 요청이 성공적일 때
       setState(() {
