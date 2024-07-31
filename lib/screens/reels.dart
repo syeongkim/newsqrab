@@ -28,10 +28,15 @@ class _ReelsState extends State<Reels> {
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) {
-      controller.dispose();
-    }
+    _disposeAllControllers();
     super.dispose();
+  }
+
+  void _disposeAllControllers() {
+    _controllers.forEach((key, controller) {
+      controller.dispose();
+    });
+    _controllers.clear();
   }
 
   Future<void> fetchReels() async {
@@ -44,19 +49,71 @@ class _ReelsState extends State<Reels> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Fetched reels data: $data'); // 디버깅용 출력
-        setState(() {
-          reels = data;
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _disposeAllControllers();
+            reels = data;
+            isLoading = false;
+          });
+          _initializeAllVideoPlayers();
+        }
       } else {
         throw Exception('Failed to load reels');
       }
     } catch (e) {
       print('Error: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
+
+  Future<void> fetchReelsByOwner(String owner) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      final data = await reelsService.fetchReelsByOwner(owner);
+      print('Fetched reels by owner: $data');
+      if (mounted) {
+        setState(() {
+          _disposeAllControllers();
+          reels = data;
+          isLoading = false;
+        });
+        _initializeAllVideoPlayers();
+      }
+    } catch (e) {
+      print('Error fetching reels by owner: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _initializeAllVideoPlayers() {
+    for (int i = 0; i < reels.length; i++) {
+      initializeVideoPlayer(i, reels[i]['video'] ?? '');
+    }
+  }
+
+  void initializeVideoPlayer(int index, String url) {
+    print('Initializing video player for $url');
+    var controller = VideoPlayerController.network(url);
+
+    controller.initialize().then((_) {
+      if (mounted) {
+        setState(() {
+          _controllers[index] = controller;
+        });
+      }
+    }).catchError((err) {
+      print('Error initializing video player: $err');
+    });
   }
 
   Widget buildVideoWidget(int index) {
@@ -121,21 +178,6 @@ class _ReelsState extends State<Reels> {
         }
       });
     }
-  }
-
-  void initializeVideoPlayer(int index, String url) {
-    print('Initializing video player for $url');
-    var controller = VideoPlayerController.network(url);
-
-    controller.initialize().then((_) {
-      if (mounted) {
-        setState(() {
-          _controllers[index] = controller;
-        });
-      }
-    }).catchError((err) {
-      print('Error initializing video player: $err');
-    });
   }
 
   void showComments(BuildContext context, String reelId,
@@ -256,7 +298,7 @@ class _ReelsState extends State<Reels> {
                   buttonItem(
                       'assets/images/crabi.png', "NewsQrab", Colors.white),
                   buttonItem(
-                      'assets/images/herald.png', "헤럴드 경제", Colors.white),
+                      'assets/images/herald.png', "헤럴드경제", Colors.white),
                   buttonItem(
                       'assets/images/choseon.png', "조선 일보", Colors.white),
                   buttonItem(
@@ -266,7 +308,6 @@ class _ReelsState extends State<Reels> {
               ),
             ),
           ),
-          SizedBox(height: 10),
           // 기존 비디오 리스트 로직
           Expanded(
             child: isLoading
@@ -298,26 +339,27 @@ class _ReelsState extends State<Reels> {
       ),
     );
   }
-}
 
-Widget buttonItem(String imagePath, String label, Color bgColor) {
-  return Padding(
-    padding: const EdgeInsets.all(4.0),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton(
-          onPressed: () {
-            print("$label tapped");
-          },
-          child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
-          backgroundColor: bgColor,
-        ),
-        SizedBox(height: 8),
-        Text(label),
-      ],
-    ),
-  );
+  Widget buttonItem(String imagePath, String label, Color bgColor) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              print("$label tapped");
+              fetchReelsByOwner(label); // 소유자별 릴스를 가져오는 메서드 호출
+            },
+            child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
+            backgroundColor: bgColor,
+          ),
+          SizedBox(height: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
 }
 
 class CommentTile extends StatefulWidget {
@@ -328,7 +370,6 @@ class CommentTile extends StatefulWidget {
   final int likes;
   final ReelsService reelsService;
 
-
   const CommentTile({
     Key? key,
     required this.reelId,
@@ -337,7 +378,6 @@ class CommentTile extends StatefulWidget {
     required this.content,
     required this.likes,
     required this.reelsService,
-    required 
   }) : super(key: key);
 
   @override

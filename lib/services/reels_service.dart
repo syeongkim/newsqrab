@@ -54,4 +54,17 @@ class ReelsService {
       throw Exception('Failed to like comment: ${response.body}');
     }
   }
+
+  // 소유자별로 릴스를 가져오는 메서드 추가
+  Future<List<dynamic>> fetchReelsByOwner(String owner) async {
+    final String url = '$baseUrl/owner/$owner';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to load reels by owner');
+    }
+  }
 }
