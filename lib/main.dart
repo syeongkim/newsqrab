@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
           selectedItemColor: Colors.black,
           unselectedItemColor: Colors.grey,
           elevation: 4, // 그림자 효과
+          type: BottomNavigationBarType.fixed,
         ),
         textTheme: TextTheme(
           bodyLarge: TextStyle(color: Colors.black), // 본문 텍스트 색상
