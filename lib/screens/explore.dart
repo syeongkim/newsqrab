@@ -25,7 +25,7 @@ class Explore extends StatelessWidget {
             SliverList(
               delegate: SliverChildListDelegate(
                 [
-                  SearchSection(), // 검색 섹션
+                 // SearchSection(), // 검색 섹션
                   KingCrabSection(), // 킹크랩 섹션
                   HotScrapSection(), // 핫스크랩 섹션
                 ],
