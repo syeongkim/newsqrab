@@ -19,6 +19,7 @@ class ScrapService {
       throw Exception('Failed to load scraps');
     }
   }
+
   // 팔로우한 사용자의 스크랩 데이터를 가져오는 메서드 추가
   Future<List<dynamic>> fetchScrapsByFollowing(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -30,11 +31,27 @@ class ScrapService {
       final data = jsonDecode(response.body) as List<dynamic>;
       print('Fetched data: $data'); // 디버깅 출력 추가
       return data;
-      //return jsonDecode(response.body) as List<dynamic>;
     } else {
       throw Exception('Failed to load following scraps');
     }
   }
 
-  
+  // 팔로워 이모지를 업데이트하는 메서드 추가
+  Future<void> updateFollowerEmoji(String scrapId, String userId, String emoji) async {
+    final String url = '$baseUrl/$scrapId/followerEmojis';
+    final response = await http.put(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'userId': userId,
+        'emoji': emoji,
+      }),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update emoji');
+    }
+  }
 }

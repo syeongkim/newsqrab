@@ -109,6 +109,7 @@ class _ScrapState extends State<Scrap> {
               ),
             ),
           ),
+          SizedBox(height: 16.0), // 하단 패딩 추가
           Expanded(
             child: _articles.isEmpty
                 ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시
@@ -235,9 +236,6 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
       "followerEmojis": [], // 팔로워 이모지 초기화
       "createdAt": DateTime.now().toIso8601String(), // 생성 시간
       "updatedAt": DateTime.now().toIso8601String(), // 업데이트 시간
-
-      // "username": userProvider.username, // 사용자 이름 추가
-      // "usernickname": userProvider.nickname, // 사용자 닉네임 추가
     };
 
     try {
