@@ -300,7 +300,7 @@ class _FollowButtonState extends State<FollowButton> {
       child: ElevatedButton(
         onPressed: _toggleFollow,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
+          backgroundColor: Color(0xFFE65C5C),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
