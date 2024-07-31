@@ -138,82 +138,122 @@ class _ReelsState extends State<Reels> {
     });
   }
 
-  void showComments(BuildContext context, String reelId, List<dynamic> comments) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (BuildContext bc) {
-      return StatefulBuilder(
-        builder: (BuildContext context, StateSetter setModalState) {
-          return Padding(
-            padding: MediaQuery.of(context).viewInsets,
-            child: Container(
-              height: MediaQuery.of(context).size.height / 2,
-              padding: EdgeInsets.all(13),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: comments.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var comment = comments[index];
-                        return CommentTile(
-                          reelId: reelId,
-                          commentId: comment['_id'] ?? '',
-                          nickname: comment['nickname'] ?? 'Anonymous',
-                          content: comment['content'] ?? '',
-                          likes: comment['likes'] ?? 0,
-                          reelsService: reelsService,
-                        );
-                      },
-                    ),
-                  ),
-                  TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: "Write a comment...",
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () async {
-                          final userProvider =
-                              Provider.of<UserProvider>(context, listen: false);
-                          final userId = userProvider.userId;
-                          final nickname = userProvider.nickname;
+  void showComments(BuildContext context, String reelId,
+      List<dynamic> initialComments) async {
+    Future<List<dynamic>> fetchComments() async {
+      try {
+        final updatedComments = await reelsService.getCommentsSorted(reelId);
+        print('Fetched comments: $updatedComments');
+        return updatedComments;
+      } catch (e) {
+        print("Error fetching comments: $e");
+        return initialComments;
+      }
+    }
 
-                          try {
-                            await reelsService.addComment(reelId, userId ?? '',
-                                nickname ?? '', _commentController.text);
-                            print("Submitted comment: ${_commentController.text}");
+    List<dynamic> comments = await fetchComments();
 
-                            // 새로운 댓글을 리스트에 추가
-                            setModalState(() {
-                              comments.add({
-                                '_id': '', // 서버에서 새로운 ID를 받기 전까지 빈 값으로 설정
-                                'nickname': nickname,
-                                'content': _commentController.text,
-                                'likes': 0,
-                              });
-                            });
+    for (var comment in comments) {
+      // _id 값을 로그에 출력
+      print('Comment _id: ${comment['_id']}');
+    }
 
-                            _commentController.clear();
-                          } catch (e) {
-                            print("Error adding comment: $e");
-                          }
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext bc) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                height: MediaQuery.of(context).size.height / 2,
+                padding: EdgeInsets.all(13),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: comments.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          var comment = comments[index];
+                          print(
+                              'Rendering comment: $comment'); // 각 댓글을 렌더링할 때 데이터 출력
+                          return CommentTile(
+                            reelId: reelId,
+                            commentId: comment['_id'] ?? '',
+                            nickname: comment['nickname'] ?? 'Anonymous',
+                            content: comment['content'] ?? '',
+                            likes: comment['likes'] ?? 0,
+                            reelsService: reelsService,
+                            onLike: () async {
+                              try {
+                                await reelsService.likeComment(
+                                    reelId, comment['_id']);
+                                if (context.mounted) {
+                                  final updatedComments = await fetchComments();
+                                  setModalState(() {
+                                    comments = updatedComments;
+                                  });
+                                }
+                              } catch (e) {
+                                print("Error liking comment: $e");
+                              }
+                            },
+                          );
                         },
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+                    TextField(
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: "Write a comment...",
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: () async {
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
+                            final userId = userProvider.userId;
+                            final nickname = userProvider.nickname;
 
+                            try {
+                              await reelsService.addComment(
+                                  reelId,
+                                  userId ?? '',
+                                  nickname ?? '',
+                                  _commentController.text);
+                              print(
+                                  "Submitted comment: ${_commentController.text}");
+
+                              if (context.mounted) {
+                                setModalState(() {
+                                  comments.add({
+                                    '_id': '',
+                                    'nickname': nickname,
+                                    'content': _commentController.text,
+                                    'likes': 0,
+                                  });
+                                });
+                              }
+
+                              _commentController.clear();
+                            } catch (e) {
+                              print("Error adding comment: $e");
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -303,6 +343,7 @@ class CommentTile extends StatefulWidget {
   final String content;
   final int likes;
   final ReelsService reelsService;
+  final Future<void> Function() onLike; // 좋아요 후 콜백 함수 추가
 
   const CommentTile({
     Key? key,
@@ -312,6 +353,7 @@ class CommentTile extends StatefulWidget {
     required this.content,
     required this.likes,
     required this.reelsService,
+    required this.onLike, // 좋아요 후 콜백 함수 추가
   }) : super(key: key);
 
   @override
@@ -331,11 +373,13 @@ class _CommentTileState extends State<CommentTile> {
 
   Future<void> _likeComment() async {
     try {
+      print(widget);
       await widget.reelsService.likeComment(widget.reelId, widget.commentId);
       setState(() {
         _likes += 1;
         _isLiked = true;
       });
+      await widget.onLike(); // 좋아요 후 콜백 함수 호출
     } catch (e) {
       print("Error liking comment: $e");
     }
