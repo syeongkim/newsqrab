@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../model/user_model.dart';
 import 'user_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -110,13 +111,19 @@ class ScrapService {
     }
   }
   // GET /users/{id} API를 호출하는 메서드 추가
-  Future<Map<String, dynamic>> fetchUserById(String userId) async {
-    final String url = 'http://175.106.98.197:3000/users/$userId';
-
+  Future<User> fetchUserById(String userId) async {
+    final String url = 'http://example.com/users/$userId';
     final response = await http.get(Uri.parse(url));
 
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      // Ensure the response body is a valid JSON string
+      try {
+        final Map<String, dynamic> userData = jsonDecode(response.body);
+        return User.fromJson(userData);
+      } catch (e) {
+        print('Error parsing user data: $e');
+        throw Exception('Failed to parse user data');
+      }
     } else {
       throw Exception('Failed to load user data');
     }

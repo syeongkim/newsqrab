@@ -32,11 +32,17 @@ class _KingCrabSectionState extends State<KingCrabSection> {
     }
   }
 
-  Widget _buildKingCrabProfile(BuildContext context, Map<String, dynamic> user) {
-    String profileImage = user['profileImage'] ?? 'default_profile_image_url';
+  Widget _buildKingCrabProfile(
+      BuildContext context, Map<String, dynamic> user) {
+    String profileImage = user['profilePicture'] ??
+        'https://kr.object.ncloudstorage.com/newsqrab/profiles/crabi.png';
     String nickname = user['nickname'] ?? 'Unknown User';
     String bio = user['bio'] ?? 'No bio available';
     String followUserId = user['_id'];
+
+    // 프로필 이미지가 로컬 경로인지 네트워크 경로인지 확인
+    bool isNetworkImage =
+        profileImage.startsWith('http') || profileImage.startsWith('https');
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 8.0),
@@ -45,22 +51,27 @@ class _KingCrabSectionState extends State<KingCrabSection> {
         children: [
           GestureDetector(
             onTap: () {
-              _showUserDialog(context, followUserId, profileImage, nickname, bio);
+              _showUserDialog(
+                  context, followUserId, profileImage, nickname, bio);
             },
             child: CircleAvatar(
-              radius: 45.0,
-              backgroundImage: NetworkImage(profileImage),
+              radius: 45.0, // 원형 아바타 크기 증가
+              backgroundImage: isNetworkImage
+                  ? NetworkImage(profileImage)
+                  : AssetImage(profileImage) as ImageProvider,
             ),
           ),
           SizedBox(height: 8.0),
           Text(nickname),
-          FollowButton(followUserId: followUserId),
+          FollowButton(
+              followUserId: followUserId), // FollowButton에 followUserId 전달
         ],
       ),
     );
   }
 
-  void _showUserDialog(BuildContext context, String userId, String profileImage, String nickname, String bio) async {
+  void _showUserDialog(BuildContext context, String userId, String profileImage,
+      String nickname, String bio) async {
     List<dynamic> scrapData = [];
 
     try {
@@ -81,7 +92,8 @@ class _KingCrabSectionState extends State<KingCrabSection> {
               radius: 40,
             ),
             SizedBox(height: 8),
-            Text(nickname, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(nickname,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             SizedBox(height: 4),
             Text(bio, style: TextStyle(fontSize: 16, color: Colors.grey)),
           ],
@@ -121,7 +133,8 @@ class _KingCrabSectionState extends State<KingCrabSection> {
     );
   }
 
-  Future<void> _showDetailDialog(BuildContext context, Map<String, dynamic> item) async {
+  Future<void> _showDetailDialog(
+      BuildContext context, Map<String, dynamic> item) async {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -181,12 +194,12 @@ class _KingCrabSectionState extends State<KingCrabSection> {
           child: topUsers.isEmpty
               ? Center(child: CircularProgressIndicator())
               : ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: topUsers.length,
-            itemBuilder: (context, index) {
-              return _buildKingCrabProfile(context, topUsers[index]);
-            },
-          ),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: topUsers.length,
+                  itemBuilder: (context, index) {
+                    return _buildKingCrabProfile(context, topUsers[index]);
+                  },
+                ),
         ),
       ],
     );
@@ -254,7 +267,8 @@ class _FollowButtonState extends State<FollowButton> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
-          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          padding:
+              EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // 버튼 크기 조절
           textStyle: TextStyle(
             color: Colors.white,
             fontSize: 14.0,

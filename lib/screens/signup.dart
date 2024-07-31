@@ -3,6 +3,9 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:path/path.dart' as p;
+import 'package:mime/mime.dart';
+import 'package:http_parser/http_parser.dart';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -18,10 +21,11 @@ class _SignupState extends State<Signup> {
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   File? _profileImage;
+  String? userId; // 추가: 서버로부터 받은 사용자 ID를 저장하기 위한 필드
+  String? userNickname; // 추가: 서버로부터 받은 사용자 닉네임을 저장하기 위한 필드
 
   final ImagePicker _picker = ImagePicker();
 
-  // 이미지 선택 함수
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -33,14 +37,13 @@ class _SignupState extends State<Signup> {
     });
   }
 
-  // 회원가입 함수
   void _signup() async {
     if (_idController.text.isEmpty ||
         _passwordController.text != _confirmPasswordController.text ||
         _nicknameController.text.isEmpty) {
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (BuildContext context) => AlertDialog(
           title: const Text('Error'),
           content: const Text('Please fill all fields and confirm the password correctly.'),
           actions: <Widget>[
@@ -58,50 +61,48 @@ class _SignupState extends State<Signup> {
       // API 엔드포인트
       final String apiUrl = 'http://175.106.98.197:3000/users/register';
 
-      // 회원가입 데이터
-      final Map<String, dynamic> signupData = {
-        'username': _idController.text,
-        'password': _passwordController.text,
-        'nickname': _nicknameController.text,
-        'bio': _bioController.text,
-        'profilePicture': _profileImage != null ? base64Encode(_profileImage!.readAsBytesSync()) : null,
-      };
-
       try {
-        // POST 요청
-        final response = await http.post(
-          Uri.parse(apiUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode(signupData),
-        );
+        // Create Multipart request
+        var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
+        request.fields['username'] = _idController.text;
+        request.fields['password'] = _passwordController.text;
+        request.fields['nickname'] = _nicknameController.text;
+        request.fields['bio'] = _bioController.text;
+
+        // Check if userId and userNickname are null
+        if (userId != null) {
+          request.fields['userId'] = userId!;
+        }
+        if (userNickname != null) {
+          request.fields['usernickname'] = userNickname!;
+        }
+
+        if (_profileImage != null) {
+          // Adding the image file to the request
+          var mimeTypeData = lookupMimeType(_profileImage!.path)?.split('/');
+          var file = await http.MultipartFile.fromPath(
+            'profilePicture',
+            _profileImage!.path,
+            contentType: mimeTypeData != null
+                ? MediaType(mimeTypeData[0], mimeTypeData[1])
+                : null,
+          );
+          request.files.add(file);
+        }
+
+        // Sending the request
+        var response = await request.send();
 
         if (response.statusCode == 201) {
-          // 회원가입 성공
           print('Signup successful with ID: ${_idController.text}');
           Navigator.pushNamed(context, '/home');
         } else {
-          // 회원가입 실패
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Error'),
-              content: Text('Signup failed: ${response.body}'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
+          print('Signup failed with status: ${response.statusCode}');
         }
       } catch (e) {
-        // 네트워크 오류 처리
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
+          builder: (BuildContext context) => AlertDialog(
             title: const Text('Error'),
             content: Text('Network error: $e'),
             actions: <Widget>[
