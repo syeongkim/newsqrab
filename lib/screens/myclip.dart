@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/user_provider.dart'; // UserProvider 임포트 추가
+import '../../services/scrap_service.dart'; // ScrapService 임포트 추가
 
 class Myclip extends StatefulWidget {
   const Myclip({Key? key}) : super(key: key);
@@ -9,34 +12,9 @@ class Myclip extends StatefulWidget {
 }
 
 class _MyclipState extends State<Myclip> {
-  String bio = "나는 mz경제전문가";
-  String nickname = "크랩이";
-  final List<Map<String, dynamic>> scrapData = [
-    {
-      "scrapContent": "\"시원하네\" 한국 남자 양궁 단체, 현격한 기량 차이 꺾고 4강 진출. 일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
-      "scrapTime": "2024.7.29 10:00 PM",
-      "link": "https://www.fnnews.com/news/202407292153475630",
-      "emoji": "sentiment_very_satisfied",
-      "reactions": {
-        "sentiment_very_satisfied": 0,
-        "sentiment_satisfied": 0,
-        "sentiment_dissatisfied": 0,
-        "sentiment_very_dissatisfied": 1,
-      }
-    },
-    {
-      "scrapContent": "일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
-      "scrapTime": "2024.7.29 09:00 PM",
-      "link": "https://www.fnnews.com/news/202407292153475630",
-      "emoji": "sentiment_very_dissatisfied",
-      "reactions": {
-        "sentiment_very_satisfied": 0,
-        "sentiment_satisfied": 1,
-        "sentiment_dissatisfied": 0,
-        "sentiment_very_dissatisfied": 0,
-      }
-    },
-  ];
+  String bio = "나는 mz경제전문가"; // 기본 bio 설정
+  String nickname = ""; // 기본 닉네임 설정
+  List<Map<String, dynamic>> scrapData = []; // 스크랩 데이터 리스트
 
   final List<Map<String, String>> followingList = [
     {"name": "김예락", "profilePic": 'assets/images/crabi.png'},
@@ -63,10 +41,40 @@ class _MyclipState extends State<Myclip> {
     "박영민": true,
   };
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserNickname(); // 사용자 닉네임 불러오기
+    _fetchScrapData(); // 스크랩 데이터 불러오기
+  }
+
+  // 사용자 닉네임을 provider에서 가져오는 함수
+  void _fetchUserNickname() {
+    final userProvider = context.read<UserProvider>();
+    setState(() {
+      nickname = userProvider.nickname ?? "Hello Crabi"; //기본값을 사용하여 null 가능성 제거
+    });
+  }
+
+  // 스크랩 데이터를 서버에서 가져오는 함수
+  Future<void> _fetchScrapData() async {
+    try {
+      final scraps = await ScrapService().fetchScrapsByUserNickname(context); // 스크랩 데이터 가져오기
+      setState(() {
+        scrapData = scraps.cast<Map<String, dynamic>>(); // 스크랩 데이터 설정
+        print(scrapData); // 디버깅을 위해 데이터 출력
+      });
+    } catch (e) {
+      print('Failed to fetch scraps: $e'); // 에러 처리
+    }
+  }
+
+  // bio 또는 닉네임을 수정하는 함수
   Future<void> _editField(String field) async {
     TextEditingController controller = TextEditingController(
       text: field == 'bio' ? bio : nickname,
     );
+
     String? updatedValue = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -88,15 +96,18 @@ class _MyclipState extends State<Myclip> {
       ),
     );
 
-    setState(() {
-      if (field == 'bio') {
-        bio = updatedValue ?? bio;
-      } else {
-        nickname = updatedValue ?? nickname;
-      }
-    });
+    if (updatedValue != null && updatedValue.isNotEmpty) {
+      setState(() {
+        if (field == 'bio') {
+          bio = updatedValue; // bio 업데이트
+        } else {
+          nickname = updatedValue; // 닉네임 업데이트
+        }
+      });
+    }
   }
 
+  // 스크랩 데이터를 삭제할지 확인하는 함수
   Future<void> _showDeleteDialog(int index) async {
     bool? delete = await showDialog(
       context: context,
@@ -118,11 +129,12 @@ class _MyclipState extends State<Myclip> {
 
     if (delete == true) {
       setState(() {
-        scrapData.removeAt(index);
+        scrapData.removeAt(index); // 스크랩 데이터 삭제
       });
     }
   }
 
+  // 스크랩 데이터를 자세히 보여주는 함수
   Future<void> _showDetailDialog(Map<String, dynamic> item) async {
     await showDialog(
       context: context,
@@ -132,20 +144,20 @@ class _MyclipState extends State<Myclip> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item["scrapContent"]),
+            Text(item["title"] ?? 'No Content'), // 스크랩 제목
             SizedBox(height: 8),
             Text(
-              item["scrapTime"],
+              item["createdAt"] ?? 'No Time', // 스크랩 시간
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             SizedBox(height: 8),
             GestureDetector(
               onTap: () async {
-                final url = item["link"];
-                if (await canLaunch(url)) {
-                  await launch(url);
+                final url = item["url"];
+                if (url != null && await canLaunch(url)) {
+                  await launch(url); // 링크 열기
                 } else {
-                  throw 'Could not launch $url';
+                  throw 'Could not launch $url'; // 에러 처리
                 }
               },
               child: Text(
@@ -165,6 +177,7 @@ class _MyclipState extends State<Myclip> {
     );
   }
 
+  // 이모지에 따른 아이콘 반환 함수
   IconData _getEmojiIcon(String emoji) {
     switch (emoji) {
       case "sentiment_very_satisfied":
@@ -209,8 +222,8 @@ class _MyclipState extends State<Myclip> {
               margin: EdgeInsets.all(16),
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(20),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
                 children: [
@@ -252,182 +265,171 @@ class _MyclipState extends State<Myclip> {
                     ),
                   ),
                   Divider(),
-                  ...scrapData.map((item) {
-                    return GestureDetector(
-                      onTap: () => _showDetailDialog(item),
-                      onLongPress: () => _showDeleteDialog(scrapData.indexOf(item)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          padding: EdgeInsets.all(8.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: scrapData.length, // 스크랩 데이터 개수
+                    itemBuilder: (context, index) {
+                      final item = scrapData[index];
+                      final reactions = item["followEmojis"] ?? {}; // reactions가 null일 경우 빈 맵으로 설정
+                      return GestureDetector(
+                        onTap: () => _showDetailDialog(item), // 스크랩 상세 보기
+                        onLongPress: () => _showDeleteDialog(index), // 스크랩 삭제
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item["title"] ?? 'No Content',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  item["createdAt"] ?? 'No Time',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                                SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  children: reactions.entries.map((entry) {
+                                    return Chip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            _getEmojiIcon(entry.key),
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(entry.value.toString()),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
                           ),
+                        ),
+                      );
+                    },
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {},
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item["scrapContent"],
-                                style: TextStyle(fontSize: 14),
+                                '팔로잉',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                               ),
-                              SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    item["scrapTime"],
-                                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                                  ),
-                                  Icon(
-                                    _getEmojiIcon(item["emoji"]),
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () async {
-                                  final url = item["link"];
-                                  if (await canLaunch(url)) {
-                                    await launch(url);
-                                  } else {
-                                    throw 'Could not launch $url';
-                                  }
-                                },
-                                child: Text(
-                                  "원문보기",
-                                  style: TextStyle(fontSize: 12, color: Colors.blue),
-                                ),
+                              SizedBox(height: 4),
+                              Text(
+                                followingList.length.toString(),
+                                style: TextStyle(fontSize: 16),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(20),
+                        SizedBox(width: 32),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Column(
+                            children: [
+                              Text(
+                                '팔로워',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                followerList.length.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Following"),
-                        SizedBox(height: 8),
-                        ...followingList.map((following) {
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 8),
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
+                        Text(
+                          '팔로잉 목록',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: followingList.length, // 팔로잉 목록 개수
+                          itemBuilder: (context, index) {
+                            final user = followingList[index];
+                            final isFollowing = followingState[user["name"] ?? ""] ?? false;
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
+                              ),
+                              title: Text(user["name"] ?? 'No Name'),
+                              trailing: GestureDetector(
+                                onTap: () => _toggleFollowingState(user["name"] ?? ""),
+                                child: Icon(
+                                  isFollowing ? Icons.check : Icons.add,
+                                  color: isFollowing ? Colors.green : Colors.grey,
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage: AssetImage(following["profilePic"]!),
-                                  radius: 20,
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '팔로워 목록',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: followerList.length, // 팔로워 목록 개수
+                          itemBuilder: (context, index) {
+                            final user = followerList[index];
+                            final isFollower = followerState[user["name"] ?? ""] ?? false;
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
+                              ),
+                              title: Text(user["name"] ?? 'No Name'),
+                              trailing: GestureDetector(
+                                onTap: () => _toggleFollowerState(user["name"] ?? ""),
+                                child: Icon(
+                                  isFollower ? Icons.check : Icons.add,
+                                  color: isFollower ? Colors.green : Colors.grey,
                                 ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(following["name"]!),
-                                ),
-                                Container(
-                                  width: 60, // 버튼의 고정 가로 길이
-                                  height: 30, // 버튼의 고정 세로 길이
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      _toggleFollowingState(following["name"]!);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: (followingState[following["name"]!] ?? false) ? Colors.blue : Colors.grey, // 버튼 색상
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20), // 둥근 모서리
-                                      ),
-                                      padding: EdgeInsets.zero, // Padding을 제거하여 버튼 크기 줄이기
-                                    ).copyWith(
-                                      foregroundColor: MaterialStateProperty.all(Colors.white), // 텍스트 색상 변경
-                                    ),
-                                    child: Text((followingState[following["name"]!] ?? false) ? 'unfollow' : 'follow', style: TextStyle(fontSize: 12.0)), // 폰트 사이즈 조정
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                        SizedBox(height: 20),
-                        Text("Followers"),
-                        SizedBox(height: 8),
-                        ...followerList.map((follower) {
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 8),
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.2),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundImage: AssetImage(follower["profilePic"]!),
-                                  radius: 20,
-                                ),
-                                SizedBox(width: 16),
-                                Expanded(
-                                  child: Text(follower["name"]!),
-                                ),
-                                Container(
-                                  width: 60, // 버튼의 고정 가로 길이
-                                  height: 30, // 버튼의 고정 세로 길이
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      _toggleFollowerState(follower["name"]!);
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: (followerState[follower["name"]!] ?? false) ? Colors.blue : Colors.grey, // 버튼 색상
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20), // 둥근 모서리
-                                      ),
-                                      padding: EdgeInsets.zero, // Padding을 제거하여 버튼 크기 줄이기
-                                    ).copyWith(
-                                      foregroundColor: MaterialStateProperty.all(Colors.white), // 텍스트 색상 변경
-                                    ),
-                                    child: Text((followerState[follower["name"]!] ?? false) ? 'remove' : 'follow', style: TextStyle(fontSize: 12.0)), // 폰트 사이즈 조정
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -437,16 +439,6 @@ class _MyclipState extends State<Myclip> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildReactionIcon(IconData icon, int count) {
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: Colors.grey),
-        SizedBox(width: 4),
-        Text(count.toString(), style: TextStyle(fontSize: 12, color: Colors.grey)),
-      ],
     );
   }
 }
