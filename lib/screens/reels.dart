@@ -142,7 +142,7 @@ class _ReelsState extends State<Reels> {
             padding: MediaQuery.of(context).viewInsets, // 키보드에 의해 조정되는 패딩
             child: Container(
               height: MediaQuery.of(context).size.height / 2,
-              padding: EdgeInsets.all(20),
+              padding: EdgeInsets.all(13),
               child: Column(
                 mainAxisSize: MainAxisSize.min, // 컨텐츠 크기에 맞게 최소화
                 children: [
@@ -199,30 +199,80 @@ class _ReelsState extends State<Reels> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: reels.length,
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              itemBuilder: (context, index) {
-                final reel = reels[index];
-                if (!_controllers.containsKey(index)) {
-                  print(reel['video']);
-                  initializeVideoPlayer(index, reel['video']);
-                }
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: ListTile(
-                    subtitle: _controllers.containsKey(index) &&
-                            _controllers[index]!.value.isInitialized
-                        ? buildVideoWidget(index)
-                        : Container(
-                            height: 200,
-                            child: Center(child: CircularProgressIndicator())),
-                  ),
-                );
-              },
+      body: Column(
+        children: [
+          SizedBox(height: 13),
+          // 가로 스크롤 버튼 리스트
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 25.0), // 양 옆에 패딩 적용
+            child: Container(
+              height: 100, // 버튼과 레이블을 포함할 충분한 높이 제공
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: [
+                  buttonItem(
+                      'assets/images/crabi.png', "NewsQrab", Colors.white),
+                  buttonItem(
+                      'assets/images/herald.png', "헤럴드 경제", Colors.white),
+                  buttonItem(
+                      'assets/images/choseon.png', "조선 일보", Colors.white),
+                  buttonItem(
+                      'assets/images/sportsChoseon.png', "스포츠조선", Colors.white),
+                  buttonItem('assets/images/ytn.png', "YTN", Colors.white),
+                ],
+              ),
             ),
+          ),
+          SizedBox(height: 20),
+          // 기존 비디오 리스트 로직
+          Expanded(
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    itemCount: reels.length,
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    itemBuilder: (context, index) {
+                      final reel = reels[index];
+                      if (!_controllers.containsKey(index)) {
+                        initializeVideoPlayer(index, reel['video']);
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: ListTile(
+                          subtitle: _controllers.containsKey(index) &&
+                                  _controllers[index]!.value.isInitialized
+                              ? buildVideoWidget(index)
+                              : Container(
+                                  height: 200,
+                                  child: Center(
+                                      child: CircularProgressIndicator())),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buttonItem(String imagePath, String label, Color bgColor) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              print("$label tapped");
+            },
+            child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
+            backgroundColor: bgColor,
+          ),
+          SizedBox(height: 8),
+          Text(label),
+        ],
+      ),
     );
   }
 }
