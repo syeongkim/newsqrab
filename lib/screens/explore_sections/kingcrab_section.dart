@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../services/scrap_service.dart'; // ScrapService 임포트 추가
-import '../../services/user_provider.dart'; // UserProvider 임포트 추가
+import '../../services/scrap_service.dart';
+import '../../services/user_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class KingCrabSection extends StatefulWidget {
@@ -21,7 +21,6 @@ class _KingCrabSectionState extends State<KingCrabSection> {
     _fetchTopUsers();
   }
 
-  // 팔로워 수가 많은 유저들을 가져오는 메서드
   Future<void> _fetchTopUsers() async {
     try {
       final users = await ScrapService().fetchTopUsers();
@@ -39,14 +38,14 @@ class _KingCrabSectionState extends State<KingCrabSection> {
         'https://kr.object.ncloudstorage.com/newsqrab/profiles/crabi.png';
     String nickname = user['nickname'] ?? 'Unknown User';
     String bio = user['bio'] ?? 'No bio available';
-    String followUserId = user['_id']; // 팔로우할 유저의 ID
+    String followUserId = user['_id'];
 
     // 프로필 이미지가 로컬 경로인지 네트워크 경로인지 확인
     bool isNetworkImage =
         profileImage.startsWith('http') || profileImage.startsWith('https');
 
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 8.0), // 프로필 간의 간격 추가
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -62,7 +61,7 @@ class _KingCrabSectionState extends State<KingCrabSection> {
                   : AssetImage(profileImage) as ImageProvider,
             ),
           ),
-          SizedBox(height: 8.0), // 원형 아바타와 버튼 사이의 간격
+          SizedBox(height: 8.0),
           Text(nickname),
           FollowButton(
               followUserId: followUserId), // FollowButton에 followUserId 전달
@@ -77,8 +76,8 @@ class _KingCrabSectionState extends State<KingCrabSection> {
 
     try {
       // 스크랩 데이터를 가져옴
-      final scraps = await ScrapService().fetchScrapsByUserNickname(context);
-      scrapData = scraps.where((scrap) => scrap['userId'] == userId).toList();
+      final scraps = await ScrapService().fetchScrapsByNickname(nickname);
+      scrapData = scraps;
     } catch (e) {
       print('Failed to fetch user scraps: $e');
     }
@@ -144,10 +143,10 @@ class _KingCrabSectionState extends State<KingCrabSection> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item["title"] ?? 'No Content'), // 스크랩 제목
+            Text(item["title"] ?? 'No Content'),
             SizedBox(height: 8),
             Text(
-              item["createdAt"] ?? 'No Time', // 스크랩 시간
+              item["createdAt"] ?? 'No Time',
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             SizedBox(height: 8),
@@ -155,9 +154,9 @@ class _KingCrabSectionState extends State<KingCrabSection> {
               onTap: () async {
                 final url = item["url"];
                 if (url != null && await canLaunch(url)) {
-                  await launch(url); // 링크 열기
+                  await launch(url);
                 } else {
-                  throw 'Could not launch $url'; // 에러 처리
+                  throw 'Could not launch $url';
                 }
               },
               child: Text(
@@ -186,14 +185,14 @@ class _KingCrabSectionState extends State<KingCrabSection> {
           title: Text(
             'Popular KingCrab',
             style: TextStyle(
-              fontSize: 20.0, // 원하는 글자 크기
+              fontSize: 20.0,
             ),
           ),
         ),
         Container(
           height: 150,
           child: topUsers.isEmpty
-              ? Center(child: CircularProgressIndicator()) // 로딩 중일 때 표시
+              ? Center(child: CircularProgressIndicator())
               : ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: topUsers.length,
@@ -225,7 +224,6 @@ class _FollowButtonState extends State<FollowButton> {
     _loadFollowingStatus();
   }
 
-  // 로컬 저장소에서 팔로우 상태를 불러오는 메서드
   Future<void> _loadFollowingStatus() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -233,7 +231,6 @@ class _FollowButtonState extends State<FollowButton> {
     });
   }
 
-  // 로컬 저장소에 팔로우 상태를 저장하는 메서드
   Future<void> _saveFollowingStatus() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setBool(widget.followUserId, isFollowing);
@@ -245,15 +242,13 @@ class _FollowButtonState extends State<FollowButton> {
 
     try {
       if (isFollowing) {
-        // 언팔로우
         await ScrapService().deleteFollowing(userId, widget.followUserId);
       } else {
-        // 팔로우
         await ScrapService().updateFollowing(userId, widget.followUserId);
       }
       setState(() {
         isFollowing = !isFollowing;
-        _saveFollowingStatus(); // 상태를 로컬에 저장
+        _saveFollowingStatus();
       });
     } catch (e) {
       print('Failed to update following: $e');
@@ -263,24 +258,23 @@ class _FollowButtonState extends State<FollowButton> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 80, // 버튼의 고정 가로 길이
-      height: 30, // 버튼의 고정 세로 길이
+      width: 80,
+      height: 30,
       child: ElevatedButton(
         onPressed: _toggleFollow,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue, // 파란색 버튼
+          backgroundColor: Colors.blue,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20), // 둥근 모서리
+            borderRadius: BorderRadius.circular(20),
           ),
           padding:
               EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0), // 버튼 크기 조절
           textStyle: TextStyle(
-            color: Colors.white, // 텍스트 색상 흰색
-            fontSize: 14.0, // 텍스트 크기
+            color: Colors.white,
+            fontSize: 14.0,
           ),
         ),
-        child: Text(isFollowing ? 'Following' : 'Follow',
-            style: TextStyle(color: Colors.white)), // 텍스트 색상 흰색
+        child: Text(isFollowing ? 'Following' : 'Follow', style: TextStyle(color: Colors.white)),
       ),
     );
   }
