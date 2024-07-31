@@ -130,69 +130,93 @@ class _ReelsState extends State<Reels> {
                   : controller.play();
             });
           },
-          child: AspectRatio(
-            aspectRatio: controller.value.aspectRatio,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                VideoPlayer(controller),
-                AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
-                  child: !controller.value.isPlaying
-                      ? Container(
-                          color: Colors.black54,
-                          child: Icon(Icons.play_arrow,
-                              size: 50, color: Colors.white),
-                        )
-                      : SizedBox.shrink(), // 재생 중이면 아무것도 보여주지 않음
-                ),
-              ],
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30), // 비디오를 둥글게 만듦
+            child: AspectRatio(
+              aspectRatio: controller.value.aspectRatio,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  VideoPlayer(controller),
+                  AnimatedSwitcher(
+                    duration: Duration(milliseconds: 300),
+                    child: !controller.value.isPlaying
+                        ? Container(
+                      color: Colors.black54,
+                      child: Icon(Icons.play_arrow,
+                          size: 50, color: Colors.white),
+                    )
+                        : SizedBox.shrink(), // 재생 중이면 아무것도 보여주지 않음
+                  ),
+                ],
+              ),
             ),
           ),
         ),
-        // 댓글 버튼 추가
-        TextButton(
-          onPressed: () => showComments(context, reels[index]['_id'] ?? '',
-              reels[index]['comments'] ?? []),
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
-            children: [
-              Icon(Icons.comment, color: Colors.black), // 댓글 아이콘
-              SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격
-            ],
-          ),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.black,
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            final articleId = (reels[index]['articleId'] as List<dynamic>?)
-                ?.first
-                ?.toString();
-            print(articleId);
-            if (articleId != null) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ArticleDetailPage(articleId: articleId),
+        SizedBox(height: 10),
+        // 댓글 버튼과 기사 ID 버튼을 각각 별도의 둥근 네모 회색 컨테이너에 넣음
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: TextButton(
+                onPressed: () => showComments(context, reels[index]['_id'] ?? '',
+                    reels[index]['comments'] ?? []),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
+                  children: [
+                    Icon(Icons.comment, color: Colors.black), // 댓글 아이콘
+                    SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격
+                  ],
                 ),
-              );
-            } else {
-              print("No articleId found for the selected reel.");
-            }
-          },
-          child: Row(
-            mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
-            children: [
-              Icon(Icons.newspaper, color: Colors.black),
-              SizedBox(width: 4),
-            ],
-          ),
-          style: TextButton.styleFrom(
-            foregroundColor: Colors.black,
-          ),
-        )
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black,
+                ),
+              ),
+            ),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: TextButton(
+                onPressed: () {
+                  final articleId = (reels[index]['articleId'] as List<dynamic>?)
+                      ?.first
+                      ?.toString();
+                  print(articleId);
+                  if (articleId != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            ArticleDetailPage(articleId: articleId),
+                      ),
+                    );
+                  } else {
+                    print("No articleId found for the selected reel.");
+                  }
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
+                  children: [
+                    Icon(Icons.newspaper, color: Colors.black),
+                    SizedBox(width: 4),
+                  ],
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.black,
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -290,9 +314,9 @@ class _ReelsState extends State<Reels> {
                                     'likes': 0,
                                   });
                                 });
-                              }
 
-                              _commentController.clear();
+                                _commentController.clear();
+                              }
                             } catch (e) {
                               print("Error adding comment: $e");
                             }
@@ -341,27 +365,27 @@ class _ReelsState extends State<Reels> {
             child: isLoading
                 ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
-                    itemCount: reels.length,
-                    itemBuilder: (context, index) {
-                      final reel = reels[index];
-                      if (!_controllers.containsKey(index)) {
-                        initializeVideoPlayer(index, reel['video'] ?? '');
-                      }
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10.0),
-                        child: ListTile(
-                          title: Text(reel['title'] ?? ''),
-                          subtitle: _controllers.containsKey(index) &&
-                                  _controllers[index]!.value.isInitialized
-                              ? buildVideoWidget(index)
-                              : Container(
-                                  height: 200,
-                                  child: Center(
-                                      child: CircularProgressIndicator())),
-                        ),
-                      );
-                    },
+              itemCount: reels.length,
+              itemBuilder: (context, index) {
+                final reel = reels[index];
+                if (!_controllers.containsKey(index)) {
+                  initializeVideoPlayer(index, reel['video'] ?? '');
+                }
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  child: ListTile(
+                    title: Text(reel['title'] ?? ''),
+                    subtitle: _controllers.containsKey(index) &&
+                        _controllers[index]!.value.isInitialized
+                        ? buildVideoWidget(index)
+                        : Container(
+                        height: 200,
+                        child: Center(
+                            child: CircularProgressIndicator())),
                   ),
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -453,3 +477,4 @@ class _CommentTileState extends State<CommentTile> {
     );
   }
 }
+
