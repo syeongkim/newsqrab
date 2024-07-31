@@ -30,7 +30,7 @@ class _ReelsState extends State<Reels> {
   }
 
   Future<void> fetchReels() async {
-    final date = DateTime.now();
+    final date = DateTime.now().subtract(Duration(days: 1));
     final dateString =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     final url = Uri.parse('http://175.106.98.197:3000/reels/$dateString');
@@ -38,6 +38,7 @@ class _ReelsState extends State<Reels> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Fetched reels data: $data'); // 디버깅용 출력
         setState(() {
           reels = data;
           isLoading = false;
@@ -223,7 +224,7 @@ class _ReelsState extends State<Reels> {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           // 기존 비디오 리스트 로직
           Expanded(
             child: isLoading

@@ -1,36 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:newsqrap/services/scrap_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'scrap_service.dart'; // fetchHotScraps 메서드가 포함된 ScrapService 클래스 가져오기
 
-class HotScrapSection extends StatelessWidget {
-  final List<Map<String, dynamic>> scrapData = const [
-    {
-      'title': '사이언비티 한국 남자 영국 대체, 현장한 기란 자이 국내 4강 진출',
-      'description':
-      '올림픽 대한민국의 선다가 되지 못했다. 득 의 기조상 많이 경기가 특보다.',
-      'link': 'https://www.fnnews.com/news/202407292153475630',
-      'scrapTime': '2024.7.29 10:00 PM',
-      'emoji': 'sentiment_very_dissatisfied',
-      'reactions': {
-        'sentiment_very_satisfied': 0,
-        'sentiment_satisfied': 1,
-        'sentiment_dissatisfied': 0,
-        'sentiment_very_dissatisfied': 5
-      },
-    },
-    {
-      'title': '빈항목2',
-      'description': '여기에 뉴스 설명을 넣어주세요.',
-      'link': 'https://www.fnnews.com/news/202407292153475630',
-      'scrapTime': '2024.7.29 10:00 PM',
-      'emoji': 'sentiment_satisfied',
-      'reactions': {
-        'sentiment_very_satisfied': 0,
-        'sentiment_satisfied': 5,
-        'sentiment_dissatisfied': 0,
-        'sentiment_very_dissatisfied': 1
-      },
-    },
-  ];
+class HotScrapSection extends StatefulWidget {
+  @override
+  _HotScrapSectionState createState() => _HotScrapSectionState();
+}
+
+class _HotScrapSectionState extends State<HotScrapSection> {
+  late Future<List<Map<String, dynamic>>> _hotScrapsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _hotScrapsFuture = fetchHotScraps();
+  }
+
+  Future<List<Map<String, dynamic>>> fetchHotScraps() async {
+    final scrapService = ScrapService();
+    final scraps = await scrapService.fetchHotScraps();
+    return scraps.cast<Map<String, dynamic>>(); // 타입 캐스팅
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +37,25 @@ class HotScrapSection extends StatelessWidget {
           ),
         ),
         Container(
-          height: 150,
-          child: ListView.builder(
-            itemCount: scrapData.length,
-            itemBuilder: (context, index) {
-              return _buildHotScrapItem(context, scrapData[index]);
+          height: 300,
+          child: FutureBuilder<List<Map<String, dynamic>>>(
+            future: _hotScrapsFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Failed to load hot scraps'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return Center(child: Text('No hot scraps available'));
+              } else {
+                final scrapData = snapshot.data!;
+                return ListView.builder(
+                  itemCount: scrapData.length,
+                  itemBuilder: (context, index) {
+                    return _buildHotScrapItem(context, scrapData[index]);
+                  },
+                );
+              }
             },
           ),
         ),
@@ -89,22 +94,22 @@ class HotScrapSection extends StatelessWidget {
         ],
       ),
       child: ListTile(
-        title: Text(item['title']),
+        title: Text(item['title'] ?? 'No title'), // null 체크
         subtitle: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item['description']),
+            Text(item['description'] ?? 'No description'), // null 체크
             SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  item['scrapTime'],
+                  item['scrapTime'] ?? 'No time', // null 체크
                   style: TextStyle(fontSize: 12, color: Colors.grey),
                 ),
                 Icon(
-                  _getEmojiIcon(item['emoji']),
+                  _getEmojiIcon(item['emoji'] ?? 'sentiment_neutral'), // null 체크
                   size: 14,
                   color: Colors.grey,
                 ),
@@ -113,7 +118,7 @@ class HotScrapSection extends StatelessWidget {
             SizedBox(height: 8),
             GestureDetector(
               onTap: () async {
-                final url = item['link'];
+                final url = item['link'] ?? '';
                 if (await canLaunchUrl(Uri.parse(url))) {
                   await launchUrl(Uri.parse(url));
                 } else {
@@ -133,19 +138,19 @@ class HotScrapSection extends StatelessWidget {
               children: [
                 _buildReactionIcon(
                   Icons.sentiment_very_satisfied,
-                  item['reactions']['sentiment_very_satisfied'],
+                  item['reactions']?['sentiment_very_satisfied'] ?? 0, // null 체크
                 ),
                 _buildReactionIcon(
                   Icons.sentiment_satisfied,
-                  item['reactions']['sentiment_satisfied'],
+                  item['reactions']?['sentiment_satisfied'] ?? 0, // null 체크
                 ),
                 _buildReactionIcon(
                   Icons.sentiment_dissatisfied,
-                  item['reactions']['sentiment_dissatisfied'],
+                  item['reactions']?['sentiment_dissatisfied'] ?? 0, // null 체크
                 ),
                 _buildReactionIcon(
                   Icons.sentiment_very_dissatisfied,
-                  item['reactions']['sentiment_very_dissatisfied'],
+                  item['reactions']?['sentiment_very_dissatisfied'] ?? 0, // null 체크
                 ),
               ],
             ),
@@ -185,12 +190,17 @@ class HotScrapSection extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 20,
-                      backgroundImage: AssetImage(item['profileImage']),
+                      backgroundImage: item['profileImage'] != null
+                          ? AssetImage(item['profileImage'])
+                          : null,
+                      child: item['profileImage'] == null
+                          ? Icon(Icons.person, size: 20)
+                          : null,
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        item['profileName'],
+                        item['profileName'] ?? 'No name', // null 체크
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -221,7 +231,7 @@ class HotScrapSection extends StatelessWidget {
                   ),
                   padding: EdgeInsets.all(10),
                   child: Text(
-                    item['scrapContent'],
+                    item['scrapContent'] ?? 'No content', // null 체크
                     style: TextStyle(fontWeight: FontWeight.normal),
                   ),
                 ),
@@ -229,7 +239,7 @@ class HotScrapSection extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft, // 시간 왼쪽 정렬
                   child: Text(
-                    item['scrapTime'],
+                    item['scrapTime'] ?? 'No time', // null 체크
                     style: TextStyle(
                       color: Colors.grey, // 시간 텍스트 색상 회색으로 설정
                     ),
@@ -243,25 +253,25 @@ class HotScrapSection extends StatelessWidget {
                       icon: Icon(Icons.sentiment_very_satisfied),
                       onPressed: () {},
                     ),
-                    Text('${item['emojis']['smilecrying']}'),
+                    Text('${item['emojis']?['smilecrying'] ?? 0}'), // null 체크
                     SizedBox(width: 8),
                     IconButton(
                       icon: Icon(Icons.sentiment_satisfied),
                       onPressed: () {},
                     ),
-                    Text('${item['emojis']['crying']}'),
+                    Text('${item['emojis']?['crying'] ?? 0}'), // null 체크
                     SizedBox(width: 8),
                     IconButton(
                       icon: Icon(Icons.sentiment_dissatisfied),
                       onPressed: () {},
                     ),
-                    Text('${item['emojis']['smile']}'),
+                    Text('${item['emojis']?['smile'] ?? 0}'), // null 체크
                     SizedBox(width: 8),
                     IconButton(
                       icon: Icon(Icons.sentiment_very_dissatisfied),
                       onPressed: () {},
                     ),
-                    Text('${item['emojis']['angry']}'),
+                    Text('${item['emojis']?['angry'] ?? 0}'), // null 체크
                   ],
                 ),
               ],
