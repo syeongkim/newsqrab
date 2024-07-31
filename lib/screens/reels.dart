@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../../services/reels_service.dart';
 import 'package:provider/provider.dart';
 import '../../services/user_provider.dart';
+import 'article_detail_page.dart'; // 추가
 
 class Reels extends StatefulWidget {
   const Reels({Key? key}) : super(key: key);
@@ -158,6 +159,32 @@ class _ReelsState extends State<Reels> {
             children: [
               Icon(Icons.comment, color: Colors.black), // 댓글 아이콘
               SizedBox(width: 4), // 아이콘과 텍스트 사이의 간격
+            ],
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            final articleId = (reels[index]['articleId'] as List<dynamic>?)?.first?.toString();
+            print(articleId);
+            if (articleId != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ArticleDetailPage(articleId: articleId),
+                ),
+              );
+            } else {
+              print("No articleId found for the selected reel.");
+            }
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
+            children: [
+              Icon(Icons.newspaper, color: Colors.black),
+              SizedBox(width: 4),
             ],
           ),
           style: TextButton.styleFrom(
