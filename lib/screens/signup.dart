@@ -56,7 +56,7 @@ class _SignupState extends State<Signup> {
       return;
     } else {
       // API 엔드포인트
-      final String apiUrl = 'http://10.40.0.130:3000/users/register';
+      final String apiUrl = 'http://175.106.98.197:3000/users/register';
 
       // 회원가입 데이터
       final Map<String, dynamic> signupData = {

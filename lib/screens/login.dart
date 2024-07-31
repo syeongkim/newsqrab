@@ -20,7 +20,7 @@ class _LoginState extends State<Login> {
   void _login() async {
     if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
       // API 엔드포인트
-      final String apiUrl = 'http://10.40.0.130:3000/users/login';
+      final String apiUrl = 'http://175.106.98.197:3000/users/login';
 
       // 로그인 데이터
       final Map<String, dynamic> loginData = {

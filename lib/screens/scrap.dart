@@ -26,8 +26,8 @@ class _ScrapState extends State<Scrap> {
   // 카테고리에 따라 기사를 가져오는 비동기 메서드
   Future<void> _fetchArticles([String? category]) async {
     final url = category == null
-        ? 'http://10.40.0.130:3000/articles' // 카테고리가 없을 때 모든 기사를 가져옴
-        : 'http://10.40.0.130:3000/articles/$category'; // 선택된 카테고리의 기사만 가져옴
+        ? 'http://175.106.98.197:3000/articles' // 카테고리가 없을 때 모든 기사를 가져옴
+        : 'http://175.106.98.197:3000/articles/$category'; // 선택된 카테고리의 기사만 가져옴
     try {
       final response = await http.get(Uri.parse(url)); // 백엔드 API 호출
       if (response.statusCode == 200) {
@@ -225,7 +225,7 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.40.0.130:3000/scraps'), // 백엔드 API URL로 변경
+        Uri.parse('http://175.106.98.197:3000/scraps'), // 백엔드 API URL로 변경
         headers: {"Content-Type": "application/json"}, // 요청 헤더 설정
         body: jsonEncode(scrapData), // 스크랩 데이터를 JSON으로 인코딩
       );
