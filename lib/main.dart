@@ -45,13 +45,17 @@ class MyApp extends StatelessWidget {
           bodyLarge: TextStyle(color: Colors.black), // 본문 텍스트 색상
           bodyMedium: TextStyle(color: Colors.black54), // 보조 본문 텍스트 색상
         ),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.white, // 버튼 색상을 하얀색으로 설정
+          textTheme: ButtonTextTheme.primary, // 버튼 텍스트 색상을 기본(primary) 색상으로 설정
+        ),
       ),
       home: LoadingLogin(), // 로그인 화면을 첫 화면으로 설정
       routes: {
         '/home': (context) => Home(), // 메인 화면을 위한 라우트 설정
         '/login': (context) => Login(), // 로그인 화면을 위한 라우트 설정
         '/signup': (context) => Signup(), // 회원가입 화면을 위한 라우트 설정
-        '/signupNaver': (context) => SignupNaver(), // 회원가입 화면을 위한 라우트 설정
+        '/signupNaver': (context) => SignupNaver(), // 네이버 회원가입 화면을 위한 라우트 설정
       },
     );
   }
