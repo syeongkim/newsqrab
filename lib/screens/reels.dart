@@ -167,7 +167,9 @@ class _ReelsState extends State<Reels> {
         ),
         TextButton(
           onPressed: () {
-            final articleId = (reels[index]['articleId'] as List<dynamic>?)?.first?.toString();
+            final articleId = (reels[index]['articleId'] as List<dynamic>?)
+                ?.first
+                ?.toString();
             print(articleId);
             if (articleId != null) {
               Navigator.push(
@@ -324,8 +326,7 @@ class _ReelsState extends State<Reels> {
                 children: [
                   buttonItem(
                       'assets/images/crabi.png', "NewsQrab", Colors.white),
-                  buttonItem(
-                      'assets/images/herald.png', "헤럴드경제", Colors.white),
+                  buttonItem('assets/images/herald.png', "헤럴드경제", Colors.white),
                   buttonItem(
                       'assets/images/choseon.png', "조선 일보", Colors.white),
                   buttonItem(
@@ -413,13 +414,11 @@ class CommentTile extends StatefulWidget {
 
 class _CommentTileState extends State<CommentTile> {
   late int _likes;
-  late bool _isLiked;
 
   @override
   void initState() {
     super.initState();
     _likes = widget.likes;
-    _isLiked = widget.likes > 0;
   }
 
   Future<void> _likeComment() async {
@@ -428,7 +427,6 @@ class _CommentTileState extends State<CommentTile> {
       await widget.reelsService.likeComment(widget.reelId, widget.commentId);
       setState(() {
         _likes += 1;
-        _isLiked = true;
       });
       // 상태 업데이트를 위젯 자체에서 처리
     } catch (e) {
@@ -445,9 +443,9 @@ class _CommentTileState extends State<CommentTile> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(_isLiked ? Icons.favorite : Icons.favorite_border),
-            color: _isLiked ? Colors.red : null,
-            onPressed: _isLiked ? null : _likeComment,
+            icon: Icon(Icons.favorite),
+            color: Colors.red,
+            onPressed: _likeComment,
           ),
           Text('$_likes'),
         ],
