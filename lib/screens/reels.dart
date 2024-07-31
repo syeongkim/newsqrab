@@ -154,7 +154,6 @@ class _ReelsState extends State<Reels> {
     List<dynamic> comments = await fetchComments();
 
     for (var comment in comments) {
-      // _id 값을 로그에 출력
       print('Comment _id: ${comment['_id']}');
     }
 
@@ -177,8 +176,7 @@ class _ReelsState extends State<Reels> {
                         itemCount: comments.length,
                         itemBuilder: (BuildContext context, int index) {
                           var comment = comments[index];
-                          print(
-                              'Rendering comment: $comment'); // 각 댓글을 렌더링할 때 데이터 출력
+                          print('Rendering comment: $comment');
                           return CommentTile(
                             reelId: reelId,
                             commentId: comment['_id'] ?? '',
@@ -186,20 +184,6 @@ class _ReelsState extends State<Reels> {
                             content: comment['content'] ?? '',
                             likes: comment['likes'] ?? 0,
                             reelsService: reelsService,
-                            onLike: () async {
-                              try {
-                                await reelsService.likeComment(
-                                    reelId, comment['_id']);
-                                if (context.mounted) {
-                                  final updatedComments = await fetchComments();
-                                  setModalState(() {
-                                    comments = updatedComments;
-                                  });
-                                }
-                              } catch (e) {
-                                print("Error liking comment: $e");
-                              }
-                            },
                           );
                         },
                       ),
@@ -343,7 +327,7 @@ class CommentTile extends StatefulWidget {
   final String content;
   final int likes;
   final ReelsService reelsService;
-  final Future<void> Function() onLike; // 좋아요 후 콜백 함수 추가
+
 
   const CommentTile({
     Key? key,
@@ -353,7 +337,7 @@ class CommentTile extends StatefulWidget {
     required this.content,
     required this.likes,
     required this.reelsService,
-    required this.onLike, // 좋아요 후 콜백 함수 추가
+    required 
   }) : super(key: key);
 
   @override
@@ -379,7 +363,7 @@ class _CommentTileState extends State<CommentTile> {
         _likes += 1;
         _isLiked = true;
       });
-      await widget.onLike(); // 좋아요 후 콜백 함수 호출
+      // 상태 업데이트를 위젯 자체에서 처리
     } catch (e) {
       print("Error liking comment: $e");
     }
