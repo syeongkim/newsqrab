@@ -298,7 +298,7 @@ class _MyclipState extends State<Myclip> {
                                 SizedBox(height: 8),
                                 Wrap(
                                   spacing: 8,
-                                  children: reactions.entries.map((entry) {
+                                  children: reactions.entries.map<Widget>((entry) {
                                     return Chip(
                                       label: Row(
                                         mainAxisSize: MainAxisSize.min,
