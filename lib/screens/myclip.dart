@@ -4,6 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../services/user_provider.dart'; // UserProvider 임포트 추가
 import '../../services/scrap_service.dart';
 import '../model/user_model.dart'; // ScrapService 임포트 추가
+import '../services/api_service.dart';
+import 'list_follower.dart';
+import 'list_following.dart';
 
 class Myclip extends StatefulWidget {
   const Myclip({Key? key}) : super(key: key);
@@ -28,6 +31,7 @@ class _MyclipState extends State<Myclip> {
     // _fetchUserNickname(); // 사용자 닉네임 불러오기
     _fetchScrapData(); // 스크랩 데이터 불러오기
   }
+
 
   // // 사용자 닉네임을 provider에서 가져오는 함수
   // void _fetchUserNickname() {
@@ -73,7 +77,15 @@ class _MyclipState extends State<Myclip> {
       print('Failed to fetch scraps: $e'); // 에러 처리
     }
   }
-
+// 프로필 업데이트 API 호출 함수
+  Future<void> _updateProfile(String userId, String field, String value) async {
+    try {
+      await ApiService.updateUserProfile(userId, {field: value}); // 변경된 부분
+      _loadUserData(); // 업데이트 후 데이터 다시 로드
+    } catch (e) {
+      print('Error updating profile: $e');
+    }
+  }
   // bio 또는 닉네임을 수정하는 함수
   Future<void> _editField(String field) async {
     TextEditingController controller = TextEditingController(
@@ -109,6 +121,12 @@ class _MyclipState extends State<Myclip> {
           nickname = updatedValue; // 닉네임 업데이트
         }
       });
+// 사용자 ID와 함께 프로필 업데이트 API 호출
+      final userProvider = context.read<UserProvider>();
+      final userId = userProvider.userId;
+      if (userId != null) {
+        _updateProfile(userId, field, updatedValue);
+      }
     }
   }
 
@@ -205,7 +223,17 @@ class _MyclipState extends State<Myclip> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: null,
-        toolbarHeight: 0,
+          actions: [
+      IconButton(
+      icon: Icon(Icons.refresh),
+      onPressed: () {
+        setState(() {
+          _loadUserData(); // 사용자 데이터 다시 로드
+          _fetchScrapData(); // 스크랩 데이터 다시 로드
+        });
+      },
+    ),],
+        toolbarHeight: 10,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -254,6 +282,14 @@ class _MyclipState extends State<Myclip> {
                             ],
                           ),
                         ),
+                        IconButton(
+                          icon: Icon(Icons.edit),
+                          onPressed: () {
+                            // 프로필 수정 기능 추가
+                            _editField('bio');
+                            // _editField('nickname');
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -264,7 +300,12 @@ class _MyclipState extends State<Myclip> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FollowingPage(followingList: followingList),
+                            ),
+                          );},
                           child: Column(
                             children: [
                               Text(
@@ -281,7 +322,12 @@ class _MyclipState extends State<Myclip> {
                         ),
                         SizedBox(width: 32),
                         GestureDetector(
-                          onTap: () {},
+                          onTap: () {Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FollowerPage(followerList: followerList),
+                            ),
+                          );},
                           child: Column(
                             children: [
                               Text(
