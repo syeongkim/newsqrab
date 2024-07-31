@@ -41,12 +41,17 @@ class ReelsService {
   // 댓글에 좋아요를 추가하는 메서드
   Future<void> likeComment(String reelId, String commentId) async {
     final String url = '$baseUrl/$reelId/comments/$commentId/like';
+    print('Sending PUT request to $url'); // URL 로그 출력
     final response = await http.put(
       Uri.parse(url),
     );
 
+    // 상태 코드와 응답 본문 출력
+    print('Response status: ${response.statusCode}');
+    print('Response body: ${response.body}');
+
     if (response.statusCode != 200) {
-      throw Exception('Failed to like comment');
+      throw Exception('Failed to like comment: ${response.body}');
     }
   }
 }

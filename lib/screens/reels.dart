@@ -94,8 +94,8 @@ class _ReelsState extends State<Reels> {
         ),
         // 댓글 버튼 추가
         TextButton(
-          onPressed: () => showComments(
-              context, reels[index]['_id'], reels[index]['comments']),
+          onPressed: () => showComments(context, reels[index]['_id'] ?? '',
+              reels[index]['comments'] ?? []),
           child: Row(
             mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
             children: [
@@ -138,72 +138,108 @@ class _ReelsState extends State<Reels> {
     });
   }
 
-  void showComments(
-      BuildContext context, String reelId, List<dynamic> comments) {
-    showModalBottomSheet(
-        context: context,
-        isScrollControlled: true,
-        builder: (BuildContext bc) {
-          return Padding(
-            padding: MediaQuery.of(context).viewInsets,
-            child: Container(
-              height: MediaQuery.of(context).size.height / 2,
-              padding: EdgeInsets.all(13),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: comments.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        var comment = comments[index];
-                        return ListTile(
-                          title: Text(comment['nickname'] ?? 'Anonymous'),
-                          subtitle: Text(comment['content']),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.favorite_border),
-                              Text('${comment['likes']}'),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  TextField(
-                    controller: _commentController,
-                    decoration: InputDecoration(
-                      hintText: "Write a comment...",
-                      suffixIcon: IconButton(
-                        icon: Icon(Icons.send),
-                        onPressed: () async {
-                          final userProvider =
-                              Provider.of<UserProvider>(context, listen: false);
-                          final userId = userProvider.userId;
-                          final nickname = userProvider.nickname;
+  void showComments(BuildContext context, String reelId,
+      List<dynamic> initialComments) async {
+    Future<List<dynamic>> fetchComments() async {
+      try {
+        final updatedComments = await reelsService.getCommentsSorted(reelId);
+        print('Fetched comments: $updatedComments');
+        return updatedComments;
+      } catch (e) {
+        print("Error fetching comments: $e");
+        return initialComments;
+      }
+    }
 
-                          try {
-                            await reelsService.addComment(reelId, userId!,
-                                nickname!, _commentController.text);
-                            print(
-                                "Submitted comment: ${_commentController.text}");
-                            _commentController.clear();
-                            Navigator.pop(context);
-                          } catch (e) {
-                            print("Error adding comment: $e");
-                          }
+    List<dynamic> comments = await fetchComments();
+
+    for (var comment in comments) {
+      print('Comment _id: ${comment['_id']}');
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext bc) {
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setModalState) {
+            return Padding(
+              padding: MediaQuery.of(context).viewInsets,
+              child: Container(
+                height: MediaQuery.of(context).size.height / 2,
+                padding: EdgeInsets.all(13),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: comments.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          var comment = comments[index];
+                          print('Rendering comment: $comment');
+                          return CommentTile(
+                            reelId: reelId,
+                            commentId: comment['_id'] ?? '',
+                            nickname: comment['nickname'] ?? 'Anonymous',
+                            content: comment['content'] ?? '',
+                            likes: comment['likes'] ?? 0,
+                            reelsService: reelsService,
+                          );
                         },
                       ),
                     ),
-                  ),
-                ],
+                    TextField(
+                      controller: _commentController,
+                      decoration: InputDecoration(
+                        hintText: "Write a comment...",
+                        suffixIcon: IconButton(
+                          icon: Icon(Icons.send),
+                          onPressed: () async {
+                            final userProvider = Provider.of<UserProvider>(
+                                context,
+                                listen: false);
+                            final userId = userProvider.userId;
+                            final nickname = userProvider.nickname;
+
+                            try {
+                              await reelsService.addComment(
+                                  reelId,
+                                  userId ?? '',
+                                  nickname ?? '',
+                                  _commentController.text);
+                              print(
+                                  "Submitted comment: ${_commentController.text}");
+
+                              if (context.mounted) {
+                                setModalState(() {
+                                  comments.add({
+                                    '_id': '',
+                                    'nickname': nickname,
+                                    'content': _commentController.text,
+                                    'likes': 0,
+                                  });
+                                });
+                              }
+
+                              _commentController.clear();
+                            } catch (e) {
+                              print("Error adding comment: $e");
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
+      },
+    );
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -234,18 +270,18 @@ class _ReelsState extends State<Reels> {
           // 기존 비디오 리스트 로직
           Expanded(
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     itemCount: reels.length,
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
                     itemBuilder: (context, index) {
                       final reel = reels[index];
                       if (!_controllers.containsKey(index)) {
-                        initializeVideoPlayer(index, reel['video']);
+                        initializeVideoPlayer(index, reel['video'] ?? '');
                       }
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: ListTile(
+                          title: Text(reel['title'] ?? ''),
                           subtitle: _controllers.containsKey(index) &&
                                   _controllers[index]!.value.isInitialized
                               ? buildVideoWidget(index)
@@ -262,22 +298,91 @@ class _ReelsState extends State<Reels> {
       ),
     );
   }
+}
 
-  Widget buttonItem(String imagePath, String label, Color bgColor) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Column(
+Widget buttonItem(String imagePath, String label, Color bgColor) {
+  return Padding(
+    padding: const EdgeInsets.all(4.0),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FloatingActionButton(
+          onPressed: () {
+            print("$label tapped");
+          },
+          child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
+          backgroundColor: bgColor,
+        ),
+        SizedBox(height: 8),
+        Text(label),
+      ],
+    ),
+  );
+}
+
+class CommentTile extends StatefulWidget {
+  final String reelId;
+  final String commentId;
+  final String nickname;
+  final String content;
+  final int likes;
+  final ReelsService reelsService;
+
+
+  const CommentTile({
+    Key? key,
+    required this.reelId,
+    required this.commentId,
+    required this.nickname,
+    required this.content,
+    required this.likes,
+    required this.reelsService,
+    required 
+  }) : super(key: key);
+
+  @override
+  _CommentTileState createState() => _CommentTileState();
+}
+
+class _CommentTileState extends State<CommentTile> {
+  late int _likes;
+  late bool _isLiked;
+
+  @override
+  void initState() {
+    super.initState();
+    _likes = widget.likes;
+    _isLiked = widget.likes > 0;
+  }
+
+  Future<void> _likeComment() async {
+    try {
+      print(widget);
+      await widget.reelsService.likeComment(widget.reelId, widget.commentId);
+      setState(() {
+        _likes += 1;
+        _isLiked = true;
+      });
+      // 상태 업데이트를 위젯 자체에서 처리
+    } catch (e) {
+      print("Error liking comment: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(widget.nickname),
+      subtitle: Text(widget.content),
+      trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          FloatingActionButton(
-            onPressed: () {
-              print("$label tapped");
-            },
-            child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
-            backgroundColor: bgColor,
+          IconButton(
+            icon: Icon(_isLiked ? Icons.favorite : Icons.favorite_border),
+            color: _isLiked ? Colors.red : null,
+            onPressed: _isLiked ? null : _likeComment,
           ),
-          SizedBox(height: 8),
-          Text(label),
+          Text('$_likes'),
         ],
       ),
     );
