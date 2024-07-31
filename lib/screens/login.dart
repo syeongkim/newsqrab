@@ -18,7 +18,8 @@ class _LoginState extends State<Login> {
 
   // 로그인 함수
   void _login() async {
-    if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+    if (_usernameController.text.isNotEmpty &&
+        _passwordController.text.isNotEmpty) {
       // API 엔드포인트
       final String apiUrl = 'http://175.106.98.197:3000/users/login';
 
@@ -71,7 +72,8 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // 로그인 실패 대화 상자를 닫습니다.
-                          Navigator.pushNamed(context, '/signup'); // 회원가입 페이지로 이동합니다.
+                          Navigator.pushNamed(
+                              context, '/signup'); // 회원가입 페이지로 이동합니다.
                         },
                         child: const Text('회원가입'),
                       ),
@@ -109,7 +111,8 @@ class _LoginState extends State<Login> {
   void _naverLogin() async {
     try {
       final NaverLoginResult result = await FlutterNaverLogin.logIn();
-      final NaverAccountResult account = await FlutterNaverLogin.currentAccount();
+      final NaverAccountResult account =
+          await FlutterNaverLogin.currentAccount();
 
       print('로그인 성공: $account'); // 사용자 이메일 정보 출력
       if (result.status == NaverLoginStatus.loggedIn) {
@@ -139,7 +142,8 @@ class _LoginState extends State<Login> {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context); // 로그인 실패 대화 상자를 닫습니다.
-                          Navigator.pushNamed(context, '/signupNaver'); // 회원가입 페이지로 이동합니다.
+                          Navigator.pushNamed(
+                              context, '/signupNaver'); // 회원가입 페이지로 이동합니다.
                         },
                         child: const Text('회원가입'),
                       ),
@@ -175,39 +179,77 @@ class _LoginState extends State<Login> {
       body: Container(
         color: Colors.white, // body의 배경색을 흰색으로 설정
         child: Center(
-          child: SingleChildScrollView( // overflow 해결_Expanded 보다 SingleChildScrollView 선호
+          child: SingleChildScrollView(
+            // overflow 해결_Expanded 보다 SingleChildScrollView 선호
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[300], // 회색 배경색
-                  borderRadius: BorderRadius.circular(30), // 둥근 정도
-                ),
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     TextField(
                       controller: _usernameController,
-                      decoration: InputDecoration(labelText: '아이디'),
+                      decoration: InputDecoration(
+                        labelText: '아이디',
+                        labelStyle:
+                            TextStyle(color: Color(0xFFE65C5C)), // 라벨 색상 설정
+                        focusedBorder: UnderlineInputBorder(
+                          // 포커스 되었을 때 밑줄 색상
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          // 기본 밑줄 색상
+                          borderSide: BorderSide(
+                              color: Colors.grey[300]!), // 밝은 회색을 기본으로 설정
+                        ),
+                      ),
                     ),
                     TextField(
                       controller: _passwordController,
-                      decoration: InputDecoration(labelText: '비밀번호'),
+                      decoration: InputDecoration(
+                        labelText: '비밀번호',
+                        labelStyle:
+                            TextStyle(color: Color(0xFFE65C5C)), // 라벨 색상 설정
+                        focusedBorder: UnderlineInputBorder(
+                          // 포커스 되었을 때 밑줄 색상
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          // 기본 밑줄 색상
+                          borderSide: BorderSide(
+                              color: Colors.grey[300]!), // 밝은 회색을 기본으로 설정
+                        ),
+                      ),
                       obscureText: true,
                     ),
                     SizedBox(height: 20),
                     SizedBox(
-                      width: 200,
+                      width: 185,
+                      height: 45,
                       child: ElevatedButton(
                         onPressed: _login,
-                        child: Text('로그인'),
+                        child: Text(
+                          '로그인',
+                          style: TextStyle(
+                            color: Colors.white, // 글씨 색상을 하얀색으로 설정
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Color(0xFFE65C5C), // 버튼의 배경색을 #E65C5C로 설정
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(2), // 모서리를 각진 사각형으로 설정
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(height: 10),
                     GestureDetector(
                       onTap: _naverLogin,
-                      child: Image.asset('assets/images/naverlogin.png', height: 50),
+                      child: Image.asset('assets/images/naverlogin.png',
+                          height: 50),
                     ),
                   ],
                 ),
