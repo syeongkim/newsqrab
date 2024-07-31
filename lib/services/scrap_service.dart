@@ -20,6 +20,19 @@ class ScrapService {
     }
   }
 
+  // 새로운 함수 추가
+  Future<List<dynamic>> fetchScrapsByNickname(String nickname) async {
+    final String url = '$baseUrl/$nickname';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to load scraps');
+    }
+  }
+
   Future<List<dynamic>> fetchScrapsByFollowing(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final String url = '$baseUrl/following/${userProvider.userId}';
