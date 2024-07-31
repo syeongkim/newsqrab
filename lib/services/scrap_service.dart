@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import '../model/user_model.dart';
 import 'user_provider.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,19 @@ class ScrapService {
   Future<List<dynamic>> fetchScrapsByUserNickname(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final String url = '$baseUrl/${userProvider.nickname}';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to load scraps');
+    }
+  }
+
+  // 새로운 함수 추가
+  Future<List<dynamic>> fetchScrapsByNickname(String nickname) async {
+    final String url = '$baseUrl/$nickname';
 
     final response = await http.get(Uri.parse(url));
 
@@ -97,13 +111,22 @@ class ScrapService {
     }
   }
   // GET /users/{id} API를 호출하는 메서드 추가
-  Future<Map<String, dynamic>> fetchUserById(String userId) async {
+  Future<User> fetchUserById(String userId) async {
+    print('^^^^^^^^^^^^^^^^^^^^함수호출시작');
     final String url = 'http://175.106.98.197:3000/users/$userId';
-
     final response = await http.get(Uri.parse(url));
-
+print('*************get요청보냄');
     if (response.statusCode == 200) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
+      print('Response body: ${response.body}');
+      try {
+        final Map<String, dynamic> userData = jsonDecode(response.body);
+        print('Decoded JSON: $userData');
+        print('Decoded JSON type: ${userData.runtimeType}');
+        return User.fromJson(userData);
+      } catch (e) {
+        print('Error parsing user data: $e');
+        throw Exception('Failed to parse user data');
+      }
     } else {
       throw Exception('Failed to load user data');
     }
