@@ -5,7 +5,7 @@ import 'user_provider.dart';
 import 'package:flutter/material.dart';
 
 class ScrapService {
-  final String baseUrl = 'http://10.40.0.130:3000/scraps';
+  final String baseUrl = 'http://175.106.98.197:3000/scraps';
 
   Future<List<dynamic>> fetchScrapsByUserNickname(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
