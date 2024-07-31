@@ -54,4 +54,33 @@ class ReelsService {
       throw Exception('Failed to like comment: ${response.body}');
     }
   }
+
+  // 소유자별로 릴스를 가져오는 메서드 추가
+  Future<List<dynamic>> fetchReelsByOwner(String owner) async {
+    final String url = '$baseUrl/owner/$owner';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body) as List<dynamic>;
+    } else {
+      throw Exception('Failed to load reels by owner');
+    }
+  }
+
+  // 특정 ID로 기사를 가져오는 메서드 추가
+  Future<dynamic> fetchArticleById(String articleId) async {
+    final String url = 'http://175.106.98.197:3000/articles/$articleId'; // 기사 ID를 사용하여 URL을 구성
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body); // 응답을 JSON으로 디코딩
+      } else {
+        throw Exception('Failed to load article with status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching article by ID: $e');
+      throw Exception('Error fetching article by ID: $e');
+    }
+  }
 }

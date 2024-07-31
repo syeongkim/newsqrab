@@ -5,6 +5,7 @@ import 'package:video_player/video_player.dart';
 import '../../services/reels_service.dart';
 import 'package:provider/provider.dart';
 import '../../services/user_provider.dart';
+import 'article_detail_page.dart'; // 추가
 
 class Reels extends StatefulWidget {
   const Reels({Key? key}) : super(key: key);
@@ -28,10 +29,15 @@ class _ReelsState extends State<Reels> {
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) {
-      controller.dispose();
-    }
+    _disposeAllControllers();
     super.dispose();
+  }
+
+  void _disposeAllControllers() {
+    _controllers.forEach((key, controller) {
+      controller.dispose();
+    });
+    _controllers.clear();
   }
 
   Future<void> fetchReels() async {
@@ -44,19 +50,71 @@ class _ReelsState extends State<Reels> {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         print('Fetched reels data: $data'); // 디버깅용 출력
-        setState(() {
-          reels = data;
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _disposeAllControllers();
+            reels = data;
+            isLoading = false;
+          });
+          _initializeAllVideoPlayers();
+        }
       } else {
         throw Exception('Failed to load reels');
       }
     } catch (e) {
       print('Error: $e');
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
+  }
+
+  Future<void> fetchReelsByOwner(String owner) async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+      final data = await reelsService.fetchReelsByOwner(owner);
+      print('Fetched reels by owner: $data');
+      if (mounted) {
+        setState(() {
+          _disposeAllControllers();
+          reels = data;
+          isLoading = false;
+        });
+        _initializeAllVideoPlayers();
+      }
+    } catch (e) {
+      print('Error fetching reels by owner: $e');
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _initializeAllVideoPlayers() {
+    for (int i = 0; i < reels.length; i++) {
+      initializeVideoPlayer(i, reels[i]['video'] ?? '');
+    }
+  }
+
+  void initializeVideoPlayer(int index, String url) {
+    print('Initializing video player for $url');
+    var controller = VideoPlayerController.network(url);
+
+    controller.initialize().then((_) {
+      if (mounted) {
+        setState(() {
+          _controllers[index] = controller;
+        });
+      }
+    }).catchError((err) {
+      print('Error initializing video player: $err');
+    });
   }
 
   Widget buildVideoWidget(int index) {
@@ -106,6 +164,34 @@ class _ReelsState extends State<Reels> {
           style: TextButton.styleFrom(
             foregroundColor: Colors.black,
           ),
+        ),
+        TextButton(
+          onPressed: () {
+            final articleId = (reels[index]['articleId'] as List<dynamic>?)
+                ?.first
+                ?.toString();
+            print(articleId);
+            if (articleId != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ArticleDetailPage(articleId: articleId),
+                ),
+              );
+            } else {
+              print("No articleId found for the selected reel.");
+            }
+          },
+          child: Row(
+            mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
+            children: [
+              Icon(Icons.newspaper, color: Colors.black),
+              SizedBox(width: 4),
+            ],
+          ),
+          style: TextButton.styleFrom(
+            foregroundColor: Colors.black,
+          ),
         )
       ],
     );
@@ -121,21 +207,6 @@ class _ReelsState extends State<Reels> {
         }
       });
     }
-  }
-
-  void initializeVideoPlayer(int index, String url) {
-    print('Initializing video player for $url');
-    var controller = VideoPlayerController.network(url);
-
-    controller.initialize().then((_) {
-      if (mounted) {
-        setState(() {
-          _controllers[index] = controller;
-        });
-      }
-    }).catchError((err) {
-      print('Error initializing video player: $err');
-    });
   }
 
   void showComments(BuildContext context, String reelId,
@@ -255,8 +326,7 @@ class _ReelsState extends State<Reels> {
                 children: [
                   buttonItem(
                       'assets/images/crabi.png', "NewsQrab", Colors.white),
-                  buttonItem(
-                      'assets/images/herald.png', "헤럴드 경제", Colors.white),
+                  buttonItem('assets/images/herald.png', "헤럴드경제", Colors.white),
                   buttonItem(
                       'assets/images/choseon.png', "조선 일보", Colors.white),
                   buttonItem(
@@ -266,7 +336,6 @@ class _ReelsState extends State<Reels> {
               ),
             ),
           ),
-          SizedBox(height: 10),
           // 기존 비디오 리스트 로직
           Expanded(
             child: isLoading
@@ -298,26 +367,27 @@ class _ReelsState extends State<Reels> {
       ),
     );
   }
-}
 
-Widget buttonItem(String imagePath, String label, Color bgColor) {
-  return Padding(
-    padding: const EdgeInsets.all(4.0),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        FloatingActionButton(
-          onPressed: () {
-            print("$label tapped");
-          },
-          child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
-          backgroundColor: bgColor,
-        ),
-        SizedBox(height: 8),
-        Text(label),
-      ],
-    ),
-  );
+  Widget buttonItem(String imagePath, String label, Color bgColor) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              print("$label tapped");
+              fetchReelsByOwner(label); // 소유자별 릴스를 가져오는 메서드 호출
+            },
+            child: Image.asset(imagePath, width: 24, height: 24), // 이미지 크기 조절
+            backgroundColor: bgColor,
+          ),
+          SizedBox(height: 8),
+          Text(label),
+        ],
+      ),
+    );
+  }
 }
 
 class CommentTile extends StatefulWidget {
@@ -328,7 +398,6 @@ class CommentTile extends StatefulWidget {
   final int likes;
   final ReelsService reelsService;
 
-
   const CommentTile({
     Key? key,
     required this.reelId,
@@ -337,7 +406,6 @@ class CommentTile extends StatefulWidget {
     required this.content,
     required this.likes,
     required this.reelsService,
-    required 
   }) : super(key: key);
 
   @override
@@ -346,13 +414,11 @@ class CommentTile extends StatefulWidget {
 
 class _CommentTileState extends State<CommentTile> {
   late int _likes;
-  late bool _isLiked;
 
   @override
   void initState() {
     super.initState();
     _likes = widget.likes;
-    _isLiked = widget.likes > 0;
   }
 
   Future<void> _likeComment() async {
@@ -361,7 +427,6 @@ class _CommentTileState extends State<CommentTile> {
       await widget.reelsService.likeComment(widget.reelId, widget.commentId);
       setState(() {
         _likes += 1;
-        _isLiked = true;
       });
       // 상태 업데이트를 위젯 자체에서 처리
     } catch (e) {
@@ -378,9 +443,9 @@ class _CommentTileState extends State<CommentTile> {
         mainAxisSize: MainAxisSize.min,
         children: [
           IconButton(
-            icon: Icon(_isLiked ? Icons.favorite : Icons.favorite_border),
-            color: _isLiked ? Colors.red : null,
-            onPressed: _isLiked ? null : _likeComment,
+            icon: Icon(Icons.favorite),
+            color: Colors.red,
+            onPressed: _likeComment,
           ),
           Text('$_likes'),
         ],
