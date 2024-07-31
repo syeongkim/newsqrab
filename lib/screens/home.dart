@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize( // 기본 Appbar 대신 PreferredSize와 BoxDecoration을 사용하여 사용자 정의 상단 바를 생성. 이를 통해 스크롤 시 음영 효과가 사라짐
+      appBar: PreferredSize(
         preferredSize: Size.fromHeight(kToolbarHeight),
         child: Container(
           color: Colors.white, // AppBar 배경색을 흰색으로 설정
@@ -92,35 +92,52 @@ class _HomeState extends State<Home> {
           ),
         ),
       ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _pages,
+      body: Container(
+        color: Colors.white, // 전체 화면의 배경색을 흰색으로 설정
+        child: IndexedStack(
+          index: _selectedIndex,
+          children: _pages,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Following',
+            icon: ImageIcon(
+              AssetImage('assets/images/homeicon.png'), // Custom icon for home
+            ),
+            label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.explore),
-            label: 'Explore',
+            icon: ImageIcon(
+              AssetImage(
+                  'assets/images/trendingicon.png'), // Custom icon for home
+            ),
+            label: 'Trending',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark),
-            label: 'Scrap',
+            icon: ImageIcon(
+              AssetImage('assets/images/searchicon.png'), // Custom icon for home
+            ),
+            label: 'Search',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.video_library),
-            label: 'Reels',
+            icon: ImageIcon(
+              AssetImage('assets/images/videoicon.png'), // Custom icon for home
+            ),
+            label: 'Videos',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.content_paste),
+            icon: ImageIcon(
+              AssetImage('assets/images/myicon.png'), // Custom icon for home
+            ),
             label: 'My Clip',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.white,
+        // BottomNavigationBar의 배경색을 흰색으로 설정
         onTap: _onItemTapped,
       ),
     );
