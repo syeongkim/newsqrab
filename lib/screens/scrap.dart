@@ -36,7 +36,8 @@ class _ScrapState extends State<Scrap> {
           _articles = jsonDecode(response.body); // JSON 응답을 디코딩하여 _articles에 저장
         });
       } else {
-        print('Failed to load articles with status code: ${response.statusCode}'); // 오류 상태 코드 출력
+        print(
+            'Failed to load articles with status code: ${response.statusCode}'); // 오류 상태 코드 출력
         throw Exception('Failed to load articles'); // 예외 발생
       }
     } catch (e) {
@@ -52,34 +53,29 @@ class _ScrapState extends State<Scrap> {
     _fetchArticles(category); // 선택된 카테고리의 기사 불러오기
   }
 
-  // 카테고리 버튼을 생성하는 메서드
-  Widget _buildCategoryButton(String label) {
-    return GestureDetector(
-      onTap: () => _onCategorySelected(label), // 버튼 클릭 시 카테고리 선택
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0), // 버튼의 좌우 여백 설정
-        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0), // 버튼 내 텍스트와 테두리 사이의 여백
-        decoration: BoxDecoration(
-          color: Colors.grey, // 버튼 배경색을 회색으로 설정
-          borderRadius: BorderRadius.circular(10.0), // 버튼의 모서리 둥글게
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3), // 그림자 색상
-              offset: Offset(0, 4), // 그림자의 위치
-              blurRadius: 6.0, // 그림자 흐림 정도
+  // 카테고리 아이콘을 생성하는 위젯
+  Widget buttonItem(String label, String category, Color bgColor) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              print("$category tapped");
+              _onCategorySelected(category); // 카테고리 선택 시 호출되는 메서드
+            },
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14, // 텍스트 크기 조절
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFE65C5C), // 텍스트 색상을 하얀색으로 설정
+              ),
             ),
-          ],
-        ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: Colors.white, // 텍스트 색상
-              fontSize: 16.0, // 텍스트 크기
-              fontWeight: FontWeight.bold, // 텍스트 두께
-            ),
+            backgroundColor: bgColor,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -95,21 +91,22 @@ class _ScrapState extends State<Scrap> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 16.0), // 상단 패딩 추가
-          Container(
-            height: 80.0, // 버튼 컨테이너의 높이 설정
-            child: ListView(
-              scrollDirection: Axis.horizontal, // 수평 스크롤 설정
-              children: [
-                _buildCategoryButton('연예'),
-                _buildCategoryButton('사회'),
-                _buildCategoryButton('스포츠'),
-                _buildCategoryButton('경영경제'),
-                _buildCategoryButton('정치'),
-                _buildCategoryButton('문화'),
-                _buildCategoryButton('과학기술'),
-                _buildCategoryButton('세계'),
-              ],
+          Padding(
+            padding: const EdgeInsets.all(8.0), // 패딩 추가
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // 가로 방향 스크롤 설정
+              child: Row(
+                children: [
+                  buttonItem('연예', 'Entertainment', Colors.white),
+                  buttonItem('사회', 'Society', Colors.white),
+                  buttonItem('스포츠', 'Sports', Colors.white),
+                  buttonItem('경영경제', 'Economy', Colors.white),
+                  buttonItem('정치', 'Politics', Colors.white),
+                  buttonItem('문화', 'Culture', Colors.white),
+                  buttonItem('과학기술', 'Science', Colors.white),
+                  buttonItem('세계', 'World', Colors.white),
+                ],
+              ),
             ),
           ),
           SizedBox(height: 16.0), // 하단 패딩 추가
@@ -117,22 +114,24 @@ class _ScrapState extends State<Scrap> {
             child: _articles.isEmpty
                 ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시
                 : ListView.builder(
-              itemCount: _articles.length, // 기사 개수
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_articles[index]['title']), // 기사 제목 표시
-                  subtitle: Text(_articles[index]['author']), // 기사 저자 표시
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ArticleDetailPage(article: _articles[index]), // 기사 클릭 시 상세 페이지로 이동
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                    itemCount: _articles.length, // 기사 개수
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(_articles[index]['title']), // 기사 제목 표시
+                        subtitle: Text(_articles[index]['author']), // 기사 저자 표시
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArticleDetailPage(
+                                  article:
+                                      _articles[index]), // 기사 클릭 시 상세 페이지로 이동
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -158,7 +157,8 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
   // 팝업 메뉴를 표시하는 메서드
   void _showPopupMenu(BuildContext context, Offset position) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
 
     if (_selectedText != null && _selectedText!.isNotEmpty) {
       showMenu(
@@ -249,7 +249,8 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
         // 요청이 성공적일 때
         Navigator.pop(context); // 리스트 페이지로 돌아감
       } else {
-        print('Failed to scrap article with status code: ${response.statusCode}'); // 오류 상태 코드 출력
+        print(
+            'Failed to scrap article with status code: ${response.statusCode}'); // 오류 상태 코드 출력
         throw Exception('Failed to scrap article'); // 예외 발생
       }
     } catch (e) {
