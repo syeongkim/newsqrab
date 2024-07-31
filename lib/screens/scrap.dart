@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import '../../services/user_provider.dart';
 
 // Scrap 위젯 클래스
 class Scrap extends StatefulWidget {
@@ -201,17 +203,24 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
   // 스크랩 데이터를 서버에 전송하는 메서드
   Future<void> _scrapArticle() async {
+
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     final scrapData = {
       "title": widget.article['title'], // 기사 제목
       "url": widget.article['url'], // 기사 URL
       "date": widget.article['date'], // 기사 날짜
-      "userId": "60d0fe4f5311236168a109ca", // 실제 사용자 ID로 변경해야 함
+      "userId": userProvider.userId, // 실제 사용자 ID로 변경됨
+      "usernickname": userProvider.nickname, // 사용자 닉네임 추가
       "articleId": widget.article['_id'], // 기사 ID
       "highlightedText": _selectedText, // 선택된 텍스트
       "myemoji": _selectedEmoji, // 선택된 이모지
       "followerEmojis": [], // 팔로워 이모지 초기화
       "createdAt": DateTime.now().toIso8601String(), // 생성 시간
       "updatedAt": DateTime.now().toIso8601String(), // 업데이트 시간
+
+      // "username": userProvider.username, // 사용자 이름 추가
+      // "usernickname": userProvider.nickname, // 사용자 닉네임 추가
     };
 
     try {

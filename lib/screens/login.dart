@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_naver_login/flutter_naver_login.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:provider/provider.dart';
+import '../services/user_provider.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -36,7 +38,16 @@ class _LoginState extends State<Login> {
 
         if (response.statusCode == 200) {
           // 로그인 성공
+          final responseData = jsonDecode(response.body);
           print('Login successful with username: ${_usernameController.text}');
+
+          // UserProvider에 사용자 정보 저장
+          Provider.of<UserProvider>(context, listen: false).setUser(
+            responseData['_id'],
+            responseData['username'],
+            responseData['nickname'],
+          );
+
           Navigator.pushReplacementNamed(context, '/home');
         } else {
           // 로그인 실패

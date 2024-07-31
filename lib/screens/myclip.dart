@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/user_provider.dart'; // UserProvider 임포트 추가
+import '../../services/scrap_service.dart'; // ScrapService 임포트 추가
 
 class Myclip extends StatefulWidget {
   const Myclip({Key? key}) : super(key: key);
@@ -9,40 +12,44 @@ class Myclip extends StatefulWidget {
 }
 
 class _MyclipState extends State<Myclip> {
-  String bio = "나는 mz경제전문가";
-  String nickname = "크랩이";
-  final List<Map<String, dynamic>> scrapData = [
-    {
-      "scrapContent": "\"시원하네\" 한국 남자 양궁 단체, 현격한 기량 차이 꺾고 4강 진출. 일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
-      "scrapTime": "2024.7.29 10:00 PM",
-      "link": "https://www.fnnews.com/news/202407292153475630",
-      "emoji": "sentiment_very_satisfied",
-      "reactions": {
-        "sentiment_very_satisfied": 0,
-        "sentiment_satisfied": 0,
-        "sentiment_dissatisfied": 0,
-        "sentiment_very_dissatisfied": 1,
-      }
-    },
-    {
-      "scrapContent": "일본은 대한민국의 상대가 되지 못했다. 큰 위기조차 없이 경기가 끝났다.",
-      "scrapTime": "2024.7.29 09:00 PM",
-      "link": "https://www.fnnews.com/news/202407292153475630",
-      "emoji": "sentiment_very_dissatisfied",
-      "reactions": {
-        "sentiment_very_satisfied": 0,
-        "sentiment_satisfied": 1,
-        "sentiment_dissatisfied": 0,
-        "sentiment_very_dissatisfied": 0,
-      }
-    },
-  ];
+  String bio = "나는 mz경제전문가"; // 기본 bio 설정
+  String nickname = ""; // 기본 닉네임 설정
+  List<Map<String, dynamic>> scrapData = []; // 스크랩 데이터 리스트
 
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserNickname(); // 사용자 닉네임 불러오기
+    _fetchScrapData(); // 스크랩 데이터 불러오기
+  }
+
+  // 사용자 닉네임을 provider에서 가져오는 함수
+  void _fetchUserNickname() {
+    final userProvider = context.read<UserProvider>();
+    setState(() {
+      nickname = userProvider.nickname ?? "Hello Crabi"; //기본값을 사용하여 null 가능성 제거
+    });
+  }
+
+  // 스크랩 데이터를 서버에서 가져오는 함수
+  Future<void> _fetchScrapData() async {
+    try {
+      final scraps = await ScrapService().fetchScrapsByUserNickname(context); // 스크랩 데이터 가져오기
+      setState(() {
+        scrapData = scraps.cast<Map<String, dynamic>>(); // 스크랩 데이터 설정
+        print(scrapData); // 디버깅을 위해 데이터 출력
+      });
+    } catch (e) {
+      print('Failed to fetch scraps: $e'); // 에러 처리
+    }
+  }
+
+  // bio 또는 닉네임을 수정하는 함수
   Future<void> _editField(String field) async {
     TextEditingController controller = TextEditingController(
       text: field == 'bio' ? bio : nickname,
     );
-    String updatedValue = await showDialog(
+    String? updatedValue = await showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Edit $field'),
@@ -63,15 +70,18 @@ class _MyclipState extends State<Myclip> {
       ),
     );
 
-    setState(() {
-      if (field == 'bio') {
-        bio = updatedValue;
-      } else {
-        nickname = updatedValue;
-      }
-    });
+    if (updatedValue != null && updatedValue.isNotEmpty) {
+      setState(() {
+        if (field == 'bio') {
+          bio = updatedValue; // bio 업데이트
+        } else {
+          nickname = updatedValue; // 닉네임 업데이트
+        }
+      });
+    }
   }
 
+  // 스크랩 데이터를 삭제할지 확인하는 함수
   Future<void> _showDeleteDialog(int index) async {
     bool? delete = await showDialog(
       context: context,
@@ -93,11 +103,12 @@ class _MyclipState extends State<Myclip> {
 
     if (delete == true) {
       setState(() {
-        scrapData.removeAt(index);
+        scrapData.removeAt(index); // 스크랩 데이터 삭제
       });
     }
   }
 
+  // 스크랩 데이터를 자세히 보여주는 함수
   Future<void> _showDetailDialog(Map<String, dynamic> item) async {
     await showDialog(
       context: context,
@@ -107,20 +118,20 @@ class _MyclipState extends State<Myclip> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(item["scrapContent"]),
+            Text(item["title"] ?? 'No Content'), // 스크랩 제목
             SizedBox(height: 8),
             Text(
-              item["scrapTime"],
+              item["createdAt"] ?? 'No Time', // 스크랩 시간
               style: TextStyle(fontSize: 12, color: Colors.grey),
             ),
             SizedBox(height: 8),
             GestureDetector(
               onTap: () async {
-                final url = item["link"];
-                if (await canLaunch(url)) {
-                  await launch(url);
+                final url = item["url"];
+                if (url != null && await canLaunch(url)) {
+                  await launch(url); // 링크 열기
                 } else {
-                  throw 'Could not launch $url';
+                  throw 'Could not launch $url'; // 에러 처리
                 }
               },
               child: Text(
@@ -140,6 +151,7 @@ class _MyclipState extends State<Myclip> {
     );
   }
 
+  // 이모지에 따른 아이콘 반환 함수
   IconData _getEmojiIcon(String emoji) {
     switch (emoji) {
       case "sentiment_very_satisfied":
@@ -179,7 +191,7 @@ class _MyclipState extends State<Myclip> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onLongPress: () => _editField('bio'),
+                      onLongPress: () => _editField('bio'), // bio 수정
                       child: CircleAvatar(
                         backgroundImage: AssetImage('assets/images/crabi.png'),
                         radius: 40,
@@ -191,7 +203,7 @@ class _MyclipState extends State<Myclip> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           GestureDetector(
-                            onLongPress: () => _editField('nickname'),
+                            onLongPress: () => _editField('nickname'), // 닉네임 수정
                             child: Text(
                               nickname,
                               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -199,7 +211,7 @@ class _MyclipState extends State<Myclip> {
                           ),
                           SizedBox(height: 4),
                           GestureDetector(
-                            onLongPress: () => _editField('bio'),
+                            onLongPress: () => _editField('bio'), // bio 수정
                             child: Text(
                               bio,
                               style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -215,12 +227,13 @@ class _MyclipState extends State<Myclip> {
               ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                itemCount: scrapData.length,
+                itemCount: scrapData.length, // 스크랩 데이터 개수
                 itemBuilder: (context, index) {
                   final item = scrapData[index];
+                  final reactions = item["followEmojis"] ?? {}; // reactions가 null일 경우 빈 맵으로 설정
                   return GestureDetector(
-                    onTap: () => _showDetailDialog(item),
-                    onLongPress: () => _showDeleteDialog(index),
+                    onTap: () => _showDetailDialog(item), // 스크랩 상세 보기
+                    onLongPress: () => _showDeleteDialog(index), // 스크랩 삭제
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Card(
@@ -230,7 +243,7 @@ class _MyclipState extends State<Myclip> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                item["scrapContent"],
+                                item["title"] ?? 'No Content', // 스크랩 제목
                                 style: TextStyle(fontSize: 14),
                               ),
                               SizedBox(height: 8),
@@ -238,11 +251,11 @@ class _MyclipState extends State<Myclip> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    item["scrapTime"],
+                                    item["createdAt"] ?? 'No Time', // 스크랩 시간
                                     style: TextStyle(fontSize: 12, color: Colors.grey),
                                   ),
                                   Icon(
-                                    _getEmojiIcon(item["emoji"]),
+                                    _getEmojiIcon(item["emoji"] ?? 'sentiment_neutral'), // 이모지 아이콘
                                     size: 14,
                                     color: Colors.grey,
                                   ),
@@ -251,11 +264,11 @@ class _MyclipState extends State<Myclip> {
                               SizedBox(height: 8),
                               GestureDetector(
                                 onTap: () async {
-                                  final url = item["link"];
-                                  if (await canLaunch(url)) {
-                                    await launch(url);
+                                  final url = item["url"];
+                                  if (url != null && await canLaunch(url)) {
+                                    await launch(url); // 링크 열기
                                   } else {
-                                    throw 'Could not launch $url';
+                                    throw 'Could not launch $url'; // 에러 처리
                                   }
                                 },
                                 child: Text(
@@ -269,19 +282,19 @@ class _MyclipState extends State<Myclip> {
                                 children: [
                                   _buildReactionIcon(
                                     Icons.sentiment_very_satisfied,
-                                    item["reactions"]["sentiment_very_satisfied"],
+                                    reactions["sentiment_very_satisfied"] ?? 0, // 반응 개수
                                   ),
                                   _buildReactionIcon(
                                     Icons.sentiment_satisfied,
-                                    item["reactions"]["sentiment_satisfied"],
+                                    reactions["sentiment_satisfied"] ?? 0, // 반응 개수
                                   ),
                                   _buildReactionIcon(
                                     Icons.sentiment_dissatisfied,
-                                    item["reactions"]["sentiment_dissatisfied"],
+                                    reactions["sentiment_dissatisfied"] ?? 0, // 반응 개수
                                   ),
                                   _buildReactionIcon(
                                     Icons.sentiment_very_dissatisfied,
-                                    item["reactions"]["sentiment_very_dissatisfied"],
+                                    reactions["sentiment_very_dissatisfied"] ?? 0, // 반응 개수
                                   ),
                                 ],
                               ),
@@ -300,6 +313,7 @@ class _MyclipState extends State<Myclip> {
     );
   }
 
+  // 반응 아이콘 위젯 생성 함수
   Widget _buildReactionIcon(IconData icon, int count) {
     return Row(
       children: [
@@ -312,7 +326,14 @@ class _MyclipState extends State<Myclip> {
 }
 
 void main() {
-  runApp(MaterialApp(
-    home: Myclip(),
-  ));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: MaterialApp(
+        home: Myclip(),
+      ),
+    ),
+  );
 }
