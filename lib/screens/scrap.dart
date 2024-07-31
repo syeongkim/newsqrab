@@ -70,7 +70,7 @@ class _ScrapState extends State<Scrap> {
               style: TextStyle(
                 fontSize: 14, // 텍스트 크기 조절
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFE65C5C), // 텍스트 색상을 하얀색으로 설정
+                color: Colors.black, // 텍스트 색상을 하얀색으로 설정
               ),
             ),
             backgroundColor: bgColor,

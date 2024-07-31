@@ -152,15 +152,23 @@ class _FollowingState extends State<Following> {
                     ),
                     SizedBox(height: 8),
                     Container(
+                      constraints: BoxConstraints(
+                        maxWidth: double.infinity, // 너비를 부모 컨테이너의 너비에 맞추기
+                      ),
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey.shade300), // Optional: border color
                       ),
-                      child: Text(
-                        scrapContent,
-                        style: TextStyle(fontSize: 14),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            scrapContent,
+                            style: TextStyle(fontSize: 14),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 8),
@@ -234,6 +242,3 @@ class _FollowingState extends State<Following> {
     );
   }
 }
-
-
-
