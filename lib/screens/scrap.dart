@@ -36,7 +36,8 @@ class _ScrapState extends State<Scrap> {
           _articles = jsonDecode(response.body); // JSON 응답을 디코딩하여 _articles에 저장
         });
       } else {
-        print('Failed to load articles with status code: ${response.statusCode}'); // 오류 상태 코드 출력
+        print(
+            'Failed to load articles with status code: ${response.statusCode}'); // 오류 상태 코드 출력
         throw Exception('Failed to load articles'); // 예외 발생
       }
     } catch (e) {
@@ -53,14 +54,27 @@ class _ScrapState extends State<Scrap> {
   }
 
   // 카테고리 아이콘을 생성하는 위젯
-  Widget _buildCategoryIcon(String category, IconData icon, String label) {
-    return GestureDetector(
-      onTap: () => _onCategorySelected(category), // 아이콘 클릭 시 카테고리 선택
+  Widget buttonItem(String label, String category, Color bgColor) {
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 50.0), // 아이콘 표시
-          SizedBox(height: 8.0), // 아이콘과 텍스트 사이의 간격
-          Text(label), // 카테고리 이름 표시
+          FloatingActionButton(
+            onPressed: () {
+              print("$category tapped");
+              _onCategorySelected(category); // 카테고리 선택 시 호출되는 메서드
+            },
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14, // 텍스트 크기 조절
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFE65C5C), // 텍스트 색상을 하얀색으로 설정
+              ),
+            ),
+            backgroundColor: bgColor,
+          ),
         ],
       ),
     );
@@ -79,41 +93,44 @@ class _ScrapState extends State<Scrap> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0), // 패딩 추가
-            child: GridView.count(
-              shrinkWrap: true, // GridView를 자식 크기에 맞춤
-              crossAxisCount: 4, // 한 줄에 4개의 아이템 배치
-              children: [
-                _buildCategoryIcon('Entertainment', Icons.movie, '연예'),
-                _buildCategoryIcon('Society', Icons.people, '사회'),
-                _buildCategoryIcon('Sports', Icons.sports, '스포츠'),
-                _buildCategoryIcon('Economy', Icons.business, '경영경제'),
-                _buildCategoryIcon('Politics', Icons.gavel, '정치'),
-                _buildCategoryIcon('Culture', Icons.palette, '문화'),
-                _buildCategoryIcon('Science', Icons.science, '과학기술'),
-                _buildCategoryIcon('World', Icons.public, '세계'),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal, // 가로 방향 스크롤 설정
+              child: Row(
+                children: [
+                  buttonItem('연예', 'Entertainment', Colors.white),
+                  buttonItem('사회', 'Society', Colors.white),
+                  buttonItem('스포츠', 'Sports', Colors.white),
+                  buttonItem('경영경제', 'Economy', Colors.white),
+                  buttonItem('정치', 'Politics', Colors.white),
+                  buttonItem('문화', 'Culture', Colors.white),
+                  buttonItem('과학기술', 'Science', Colors.white),
+                  buttonItem('세계', 'World', Colors.white),
+                ],
+              ),
             ),
           ),
           Expanded(
             child: _articles.isEmpty
                 ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시
                 : ListView.builder(
-              itemCount: _articles.length, // 기사 개수
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_articles[index]['title']), // 기사 제목 표시
-                  subtitle: Text(_articles[index]['author']), // 기사 저자 표시
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ArticleDetailPage(article: _articles[index]), // 기사 클릭 시 상세 페이지로 이동
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
+                    itemCount: _articles.length, // 기사 개수
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(_articles[index]['title']), // 기사 제목 표시
+                        subtitle: Text(_articles[index]['author']), // 기사 저자 표시
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ArticleDetailPage(
+                                  article:
+                                      _articles[index]), // 기사 클릭 시 상세 페이지로 이동
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -139,7 +156,8 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
   // 팝업 메뉴를 표시하는 메서드
   void _showPopupMenu(BuildContext context, Offset position) {
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final RenderBox overlay =
+        Overlay.of(context).context.findRenderObject() as RenderBox;
 
     if (_selectedText != null && _selectedText!.isNotEmpty) {
       showMenu(
@@ -203,7 +221,6 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
   // 스크랩 데이터를 서버에 전송하는 메서드
   Future<void> _scrapArticle() async {
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final scrapData = {
@@ -234,7 +251,8 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
         // 요청이 성공적일 때
         Navigator.pop(context); // 리스트 페이지로 돌아감
       } else {
-        print('Failed to scrap article with status code: ${response.statusCode}'); // 오류 상태 코드 출력
+        print(
+            'Failed to scrap article with status code: ${response.statusCode}'); // 오류 상태 코드 출력
         throw Exception('Failed to scrap article'); // 예외 발생
       }
     } catch (e) {
