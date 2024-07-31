@@ -52,16 +52,34 @@ class _ScrapState extends State<Scrap> {
     _fetchArticles(category); // 선택된 카테고리의 기사 불러오기
   }
 
-  // 카테고리 아이콘을 생성하는 위젯
-  Widget _buildCategoryIcon(String category, IconData icon, String label) {
+  // 카테고리 버튼을 생성하는 메서드
+  Widget _buildCategoryButton(String label) {
     return GestureDetector(
-      onTap: () => _onCategorySelected(category), // 아이콘 클릭 시 카테고리 선택
-      child: Column(
-        children: [
-          Icon(icon, size: 50.0), // 아이콘 표시
-          SizedBox(height: 8.0), // 아이콘과 텍스트 사이의 간격
-          Text(label), // 카테고리 이름 표시
-        ],
+      onTap: () => _onCategorySelected(label), // 버튼 클릭 시 카테고리 선택
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.0), // 버튼의 좌우 여백 설정
+        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0), // 버튼 내 텍스트와 테두리 사이의 여백
+        decoration: BoxDecoration(
+          color: Colors.grey, // 버튼 배경색을 회색으로 설정
+          borderRadius: BorderRadius.circular(10.0), // 버튼의 모서리 둥글게
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3), // 그림자 색상
+              offset: Offset(0, 4), // 그림자의 위치
+              blurRadius: 6.0, // 그림자 흐림 정도
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              color: Colors.white, // 텍스트 색상
+              fontSize: 16.0, // 텍스트 크기
+              fontWeight: FontWeight.bold, // 텍스트 두께
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -77,23 +95,24 @@ class _ScrapState extends State<Scrap> {
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0), // 패딩 추가
-            child: GridView.count(
-              shrinkWrap: true, // GridView를 자식 크기에 맞춤
-              crossAxisCount: 4, // 한 줄에 4개의 아이템 배치
+          SizedBox(height: 16.0), // 상단 패딩 추가
+          Container(
+            height: 80.0, // 버튼 컨테이너의 높이 설정
+            child: ListView(
+              scrollDirection: Axis.horizontal, // 수평 스크롤 설정
               children: [
-                _buildCategoryIcon('Entertainment', Icons.movie, '연예'),
-                _buildCategoryIcon('Society', Icons.people, '사회'),
-                _buildCategoryIcon('Sports', Icons.sports, '스포츠'),
-                _buildCategoryIcon('Economy', Icons.business, '경영경제'),
-                _buildCategoryIcon('Politics', Icons.gavel, '정치'),
-                _buildCategoryIcon('Culture', Icons.palette, '문화'),
-                _buildCategoryIcon('Science', Icons.science, '과학기술'),
-                _buildCategoryIcon('World', Icons.public, '세계'),
+                _buildCategoryButton('연예'),
+                _buildCategoryButton('사회'),
+                _buildCategoryButton('스포츠'),
+                _buildCategoryButton('경영경제'),
+                _buildCategoryButton('정치'),
+                _buildCategoryButton('문화'),
+                _buildCategoryButton('과학기술'),
+                _buildCategoryButton('세계'),
               ],
             ),
           ),
+          SizedBox(height: 16.0), // 하단 패딩 추가
           Expanded(
             child: _articles.isEmpty
                 ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시
@@ -203,7 +222,6 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
 
   // 스크랩 데이터를 서버에 전송하는 메서드
   Future<void> _scrapArticle() async {
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final scrapData = {
@@ -218,9 +236,6 @@ class _ArticleDetailPageState extends State<ArticleDetailPage> {
       "followerEmojis": [], // 팔로워 이모지 초기화
       "createdAt": DateTime.now().toIso8601String(), // 생성 시간
       "updatedAt": DateTime.now().toIso8601String(), // 업데이트 시간
-
-      // "username": userProvider.username, // 사용자 이름 추가
-      // "usernickname": userProvider.nickname, // 사용자 닉네임 추가
     };
 
     try {
