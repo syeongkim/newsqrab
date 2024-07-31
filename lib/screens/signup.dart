@@ -125,9 +125,7 @@ class _SignupState extends State<Signup> {
         backgroundColor: Colors.white, // AppBar 배경색 흰색
         title: Row(
           children: [
-            Image.asset('assets/images/newsQrab.jpg', height: 40),
-            SizedBox(width: 10),
-            Image.asset('assets/images/newsqrab_l.jpg', height: 40),
+            Image.asset('assets/images/tabbar.png', height: 40),
             SizedBox(width: 10),
             Text('회원가입'),
           ],

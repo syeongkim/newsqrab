@@ -93,23 +93,26 @@ class _ScrapState extends State<Scrap> {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0), // 패딩 추가
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal, // 가로 방향 스크롤 설정
-              child: Row(
-                children: [
-                  buttonItem('연예', 'Entertainment', Colors.white),
-                  buttonItem('사회', 'Society', Colors.white),
-                  buttonItem('스포츠', 'Sports', Colors.white),
-                  buttonItem('경영경제', 'Economy', Colors.white),
-                  buttonItem('정치', 'Politics', Colors.white),
-                  buttonItem('문화', 'Culture', Colors.white),
-                  buttonItem('과학기술', 'Science', Colors.white),
-                  buttonItem('세계', 'World', Colors.white),
-                ],
+            child: SizedBox(
+              height: 80, // 원하는 높이로 설정
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal, // 가로 방향 스크롤 설정
+                child: Row(
+                  children: [
+                    buttonItem('연예', 'Entertainment', Colors.white),
+                    buttonItem('사회', 'Society', Colors.white),
+                    buttonItem('스포츠', 'Sports', Colors.white),
+                    buttonItem('경영경제', 'Economy', Colors.white),
+                    buttonItem('정치', 'Politics', Colors.white),
+                    buttonItem('문화', 'Culture', Colors.white),
+                    buttonItem('과학기술', 'Science', Colors.white),
+                    buttonItem('세계', 'World', Colors.white),
+                  ],
+                ),
               ),
             ),
           ),
-          SizedBox(height: 16.0), // 하단 패딩 추가
+          SizedBox(height: 8.0), // 하단 패딩 추가
           Expanded(
             child: _articles.isEmpty
                 ? Center(child: CircularProgressIndicator()) // 기사가 없을 때 로딩 표시

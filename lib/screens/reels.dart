@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:video_player/video_player.dart';
+import '../../services/reels_service.dart';
+import 'package:provider/provider.dart';
+import '../../services/user_provider.dart';
 
 class Reels extends StatefulWidget {
   const Reels({Key? key}) : super(key: key);
@@ -14,6 +17,8 @@ class _ReelsState extends State<Reels> {
   List<dynamic> reels = [];
   bool isLoading = true;
   Map<int, VideoPlayerController> _controllers = {};
+  final TextEditingController _commentController = TextEditingController();
+  final ReelsService reelsService = ReelsService();
 
   @override
   void initState() {
@@ -30,7 +35,7 @@ class _ReelsState extends State<Reels> {
   }
 
   Future<void> fetchReels() async {
-    final date = DateTime.now();
+    final date = DateTime.now().subtract(Duration(days: 1));
     final dateString =
         "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     final url = Uri.parse('http://175.106.98.197:3000/reels/$dateString');
@@ -38,6 +43,7 @@ class _ReelsState extends State<Reels> {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Fetched reels data: $data'); // 디버깅용 출력
         setState(() {
           reels = data;
           isLoading = false;
@@ -88,7 +94,8 @@ class _ReelsState extends State<Reels> {
         ),
         // 댓글 버튼 추가
         TextButton(
-          onPressed: () => showComments(context, reels[index]['comments']),
+          onPressed: () => showComments(
+              context, reels[index]['_id'], reels[index]['comments']),
           child: Row(
             mainAxisSize: MainAxisSize.min, // Row의 크기를 자식 요소에 맞춤
             children: [
@@ -131,20 +138,19 @@ class _ReelsState extends State<Reels> {
     });
   }
 
-  void showComments(BuildContext context, List<dynamic> comments) {
-    TextEditingController _commentController = TextEditingController();
-
+  void showComments(
+      BuildContext context, String reelId, List<dynamic> comments) {
     showModalBottomSheet(
         context: context,
-        isScrollControlled: true, // 키보드가 화면을 가리지 않도록
+        isScrollControlled: true,
         builder: (BuildContext bc) {
           return Padding(
-            padding: MediaQuery.of(context).viewInsets, // 키보드에 의해 조정되는 패딩
+            padding: MediaQuery.of(context).viewInsets,
             child: Container(
               height: MediaQuery.of(context).size.height / 2,
               padding: EdgeInsets.all(13),
               child: Column(
-                mainAxisSize: MainAxisSize.min, // 컨텐츠 크기에 맞게 최소화
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Expanded(
                     child: ListView.builder(
@@ -152,13 +158,6 @@ class _ReelsState extends State<Reels> {
                       itemBuilder: (BuildContext context, int index) {
                         var comment = comments[index];
                         return ListTile(
-                          leading: CircleAvatar(
-                            backgroundImage: NetworkImage(comment['userId']
-                                    ['profilePicture'] ??
-                                'assets/images/default_avatar.png'), // 가상의 URL or 기본 이미지
-                            backgroundColor: Colors.grey[200],
-                            foregroundColor: Colors.black,
-                          ),
                           title: Text(comment['nickname'] ?? 'Anonymous'),
                           subtitle: Text(comment['content']),
                           trailing: Row(
@@ -178,13 +177,22 @@ class _ReelsState extends State<Reels> {
                       hintText: "Write a comment...",
                       suffixIcon: IconButton(
                         icon: Icon(Icons.send),
-                        onPressed: () {
-                          // TODO: 댓글 제출 로직 구현
-                          print(
-                              "Submitted comment: ${_commentController.text}");
-                          // 필요한 경우 댓글을 서버에 보내고 리스트를 업데이트
-                          _commentController.clear();
-                          Navigator.pop(context);
+                        onPressed: () async {
+                          final userProvider =
+                              Provider.of<UserProvider>(context, listen: false);
+                          final userId = userProvider.userId;
+                          final nickname = userProvider.nickname;
+
+                          try {
+                            await reelsService.addComment(reelId, userId!,
+                                nickname!, _commentController.text);
+                            print(
+                                "Submitted comment: ${_commentController.text}");
+                            _commentController.clear();
+                            Navigator.pop(context);
+                          } catch (e) {
+                            print("Error adding comment: $e");
+                          }
                         },
                       ),
                     ),
@@ -196,7 +204,6 @@ class _ReelsState extends State<Reels> {
         });
   }
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
@@ -223,7 +230,7 @@ class _ReelsState extends State<Reels> {
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 10),
           // 기존 비디오 리스트 로직
           Expanded(
             child: isLoading
