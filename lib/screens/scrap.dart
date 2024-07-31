@@ -27,7 +27,7 @@ class _ScrapState extends State<Scrap> {
   Future<void> _fetchArticles([String? category]) async {
     final url = category == null
         ? 'http://175.106.98.197:3000/articles' // 카테고리가 없을 때 모든 기사를 가져옴
-        : 'http://175.106.98.197:3000/articles/$category'; // 선택된 카테고리의 기사만 가져옴
+        : 'http://175.106.98.197:3000/articles/category/$category'; // 선택된 카테고리의 기사만 가져옴
     try {
       final response = await http.get(Uri.parse(url)); // 백엔드 API 호출
       if (response.statusCode == 200) {
