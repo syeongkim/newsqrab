@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 class HotScrapSection extends StatelessWidget {
   final List<Map<String, dynamic>> scrapData = const [
     {
-      'title': '사이언비티' '한국 남자 영국 대체, 현장한 기란 자이 국내 4강 진출',
+      'title': '사이언비티 한국 남자 영국 대체, 현장한 기란 자이 국내 4강 진출',
       'description':
       '올림픽 대한민국의 선다가 되지 못했다. 득 의 기조상 많이 경기가 특보다.',
       'link': 'https://www.fnnews.com/news/202407292153475630',
@@ -74,72 +74,97 @@ class HotScrapSection extends StatelessWidget {
       }
     }
 
-    return ListTile(
-      title: Text(item['title']),
-      subtitle: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(item['description']),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item['scrapTime'],
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              Icon(
-                _getEmojiIcon(item['emoji']),
-                size: 14,
-                color: Colors.grey,
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final url = item['link'];
-              if (await canLaunchUrl(Uri.parse(url))) {
-                await launchUrl(Uri.parse(url));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Could not launch $url')),
-                );
-              }
-            },
-            child: Text(
-              '원문보기',
-              style: TextStyle(fontSize: 12, color: Colors.blue),
-            ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildReactionIcon(
-                Icons.sentiment_very_satisfied,
-                item['reactions']['sentiment_very_satisfied'],
-              ),
-              _buildReactionIcon(
-                Icons.sentiment_satisfied,
-                item['reactions']['sentiment_satisfied'],
-              ),
-              _buildReactionIcon(
-                Icons.sentiment_dissatisfied,
-                item['reactions']['sentiment_dissatisfied'],
-              ),
-              _buildReactionIcon(
-                Icons.sentiment_very_dissatisfied,
-                item['reactions']['sentiment_very_dissatisfied'],
-              ),
-            ],
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.grey[200], // 회색 배경
+        borderRadius: BorderRadius.circular(20), // 둥근 모서리
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 2,
+            blurRadius: 4,
+            offset: Offset(0, 2), // 그림자의 위치 조정
           ),
         ],
       ),
-      onTap: () {
-        _showPopup(context, item);
-      },
+      child: ListTile(
+        title: Text(item['title']),
+        subtitle: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(item['description']),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item['scrapTime'],
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+                Icon(
+                  _getEmojiIcon(item['emoji']),
+                  size: 14,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
+            SizedBox(height: 8),
+            GestureDetector(
+              onTap: () async {
+                final url = item['link'];
+                if (await canLaunchUrl(Uri.parse(url))) {
+                  await launchUrl(Uri.parse(url));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Could not launch $url')),
+                  );
+                }
+              },
+              child: Text(
+                '원문보기',
+                style: TextStyle(fontSize: 12, color: Colors.blue),
+              ),
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildReactionIcon(
+                  Icons.sentiment_very_satisfied,
+                  item['reactions']['sentiment_very_satisfied'],
+                ),
+                _buildReactionIcon(
+                  Icons.sentiment_satisfied,
+                  item['reactions']['sentiment_satisfied'],
+                ),
+                _buildReactionIcon(
+                  Icons.sentiment_dissatisfied,
+                  item['reactions']['sentiment_dissatisfied'],
+                ),
+                _buildReactionIcon(
+                  Icons.sentiment_very_dissatisfied,
+                  item['reactions']['sentiment_very_dissatisfied'],
+                ),
+              ],
+            ),
+          ],
+        ),
+        onTap: () {
+          _showPopup(context, item);
+        },
+      ),
+    );
+  }
+
+  Widget _buildReactionIcon(IconData icon, int count) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.grey),
+        SizedBox(width: 4),
+        Text(count.toString(), style: TextStyle(color: Colors.grey)),
+      ],
     );
   }
 
@@ -244,16 +269,6 @@ class HotScrapSection extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildReactionIcon(IconData icon, int count) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.grey),
-        SizedBox(width: 4),
-        Text(count.toString(), style: TextStyle(color: Colors.grey)),
-      ],
     );
   }
 }
