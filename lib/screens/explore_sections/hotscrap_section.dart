@@ -13,6 +13,7 @@ class _HotScrapSectionState extends State<HotScrapSection> {
   late Future<List<Map<String, dynamic>>> _hotScrapsFuture;
   List<List<int>> emojiCounts = []; // 각 스크랩 항목의 이모지 개수를 추적하기 위한 리스트
   String? userId;
+  Map<String, dynamic> usersCache = {};
 
   @override
   void initState() {
@@ -96,16 +97,18 @@ class _HotScrapSectionState extends State<HotScrapSection> {
   }
 
   void _showPopup(BuildContext context, Map<String, dynamic> item) async {
-    List<dynamic> followingList = [];
-    List<dynamic> followerList = [];
-
-    try {
-      final user = await ScrapService().fetchUserById(item["userId"]);
-      followingList = user.following;
-      followerList = user.followers;
-    } catch (e) {
-      print('Failed to fetch user data: $e');
+    final userId = item['userId'];
+    if (userId == null) {
+      return;
     }
+
+    final user = usersCache[userId];
+    if (user == null) {
+      return;
+    }
+
+    final followingList = user['following'] ?? [];
+    final followerList = user['followers'] ?? [];
 
     showDialog(
       context: context,
@@ -113,7 +116,7 @@ class _HotScrapSectionState extends State<HotScrapSection> {
         title: Column(
           children: [
             CircleAvatar(
-              backgroundImage: NetworkImage(item['profileImage'] ?? 'assets/images/crabi.png'),
+              backgroundImage: NetworkImage(usersCache[userId]?['profilePicture'] ?? 'assets/images/crabi.png'),
               radius: 40,
             ),
             SizedBox(height: 8),
@@ -271,7 +274,7 @@ class _HotScrapSectionState extends State<HotScrapSection> {
                   itemCount: scrapData.length,
                   itemBuilder: (context, index) {
                     final item = scrapData[index];
-                    final profileImage = item["profileImage"] ?? 'assets/images/crabi.png';
+                    final profileImage = usersCache[userId]?["profilePicture"] ?? 'assets/images/crabi.png';
                     final profileName = item["usernickname"] ?? 'Unknown';
                     final scrapContent = item["highlightedText"] ?? 'No content available';
                     final scrapTime = item["createdAt"] ?? 'Unknown time'; // createdAt 필드 사용
