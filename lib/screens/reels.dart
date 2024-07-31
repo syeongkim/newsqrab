@@ -138,69 +138,82 @@ class _ReelsState extends State<Reels> {
     });
   }
 
-  void showComments(
-      BuildContext context, String reelId, List<dynamic> comments) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext bc) {
-        return Padding(
-          padding: MediaQuery.of(context).viewInsets,
-          child: Container(
-            height: MediaQuery.of(context).size.height / 2,
-            padding: EdgeInsets.all(13),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: comments.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      var comment = comments[index];
-                      return CommentTile(
-                        reelId: reelId,
-                        commentId: comment['_id'] ?? '',
-                        nickname: comment['nickname'] ?? 'Anonymous',
-                        content: comment['content'] ?? '',
-                        likes: comment['likes'] ?? 0,
-                        reelsService: reelsService,
-                      );
-                    },
-                  ),
-                ),
-                TextField(
-                  controller: _commentController,
-                  decoration: InputDecoration(
-                    hintText: "Write a comment...",
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.send),
-                      onPressed: () async {
-                        final userProvider =
-                            Provider.of<UserProvider>(context, listen: false);
-                        final userId = userProvider.userId;
-                        final nickname = userProvider.nickname;
-
-                        try {
-                          await reelsService.addComment(reelId, userId ?? '',
-                              nickname ?? '', _commentController.text);
-                          print(
-                              "Submitted comment: ${_commentController.text}");
-                          _commentController.clear();
-                          Navigator.pop(context);
-                        } catch (e) {
-                          print("Error adding comment: $e");
-                        }
+  void showComments(BuildContext context, String reelId, List<dynamic> comments) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext bc) {
+      return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setModalState) {
+          return Padding(
+            padding: MediaQuery.of(context).viewInsets,
+            child: Container(
+              height: MediaQuery.of(context).size.height / 2,
+              padding: EdgeInsets.all(13),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: comments.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        var comment = comments[index];
+                        return CommentTile(
+                          reelId: reelId,
+                          commentId: comment['_id'] ?? '',
+                          nickname: comment['nickname'] ?? 'Anonymous',
+                          content: comment['content'] ?? '',
+                          likes: comment['likes'] ?? 0,
+                          reelsService: reelsService,
+                        );
                       },
                     ),
                   ),
-                ),
-              ],
+                  TextField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      hintText: "Write a comment...",
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.send),
+                        onPressed: () async {
+                          final userProvider =
+                              Provider.of<UserProvider>(context, listen: false);
+                          final userId = userProvider.userId;
+                          final nickname = userProvider.nickname;
+
+                          try {
+                            await reelsService.addComment(reelId, userId ?? '',
+                                nickname ?? '', _commentController.text);
+                            print("Submitted comment: ${_commentController.text}");
+
+                            // 새로운 댓글을 리스트에 추가
+                            setModalState(() {
+                              comments.add({
+                                '_id': '', // 서버에서 새로운 ID를 받기 전까지 빈 값으로 설정
+                                'nickname': nickname,
+                                'content': _commentController.text,
+                                'likes': 0,
+                              });
+                            });
+
+                            _commentController.clear();
+                          } catch (e) {
+                            print("Error adding comment: $e");
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-    );
-  }
+          );
+        },
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
