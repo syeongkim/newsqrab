@@ -112,13 +112,16 @@ class ScrapService {
   }
   // GET /users/{id} API를 호출하는 메서드 추가
   Future<User> fetchUserById(String userId) async {
-    final String url = 'http://example.com/users/$userId';
+    print('^^^^^^^^^^^^^^^^^^^^함수호출시작');
+    final String url = 'http://175.106.98.197:3000/users/$userId';
     final response = await http.get(Uri.parse(url));
-
+print('*************get요청보냄');
     if (response.statusCode == 200) {
-      // Ensure the response body is a valid JSON string
+      print('Response body: ${response.body}');
       try {
         final Map<String, dynamic> userData = jsonDecode(response.body);
+        print('Decoded JSON: $userData');
+        print('Decoded JSON type: ${userData.runtimeType}');
         return User.fromJson(userData);
       } catch (e) {
         print('Error parsing user data: $e');

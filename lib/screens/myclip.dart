@@ -16,8 +16,9 @@ class _MyclipState extends State<Myclip> {
   String bio = ""; // 기본 bio 설정
   String nickname = ""; // 기본 닉네임 설정
   List<Map<String, dynamic>> scrapData = []; // 스크랩 데이터 리스트
-  List<Map<String, String>> followingList = []; // 팔로잉 리스트
-  List<Map<String, String>> followerList = []; // 팔로워 리스트
+  String profilePicture = "";
+  List<String> followingList = [];
+  List<String> followerList = [];
 
   @override
   void initState() {
@@ -41,7 +42,7 @@ class _MyclipState extends State<Myclip> {
     try {
       final userProvider = context.read<UserProvider>();
       final userId = userProvider.userId;
-
+      print('%%%%%%%%%%%%%Fetched userId: $userId');
       if (userId == null) {
         print('User ID is null');
         return;
@@ -52,14 +53,9 @@ class _MyclipState extends State<Myclip> {
       setState(() {
         bio = user.bio;
         nickname = user.nickname;
-        followingList = user.following.map((follower) => {
-          "name": follower.name,
-          "profilePic": follower.profilePic,
-        }).toList();
-        followerList = user.followers.map((follower) => {
-          "name": follower.name,
-          "profilePic": follower.profilePic,
-        }).toList();
+        profilePicture = user.profilePicture;
+        followingList = user.following;
+        followerList = user.followers;
       });
     } catch (e) {
       print('Error fetching user data: $e');
