@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Signup extends StatefulWidget {
   const Signup({super.key});
@@ -12,14 +14,14 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-  TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   File? _profileImage;
 
   final ImagePicker _picker = ImagePicker();
 
+  // 이미지 선택 함수
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     setState(() {
@@ -31,7 +33,8 @@ class _SignupState extends State<Signup> {
     });
   }
 
-  void _signup() {
+  // 회원가입 함수
+  void _signup() async {
     if (_idController.text.isEmpty ||
         _passwordController.text != _confirmPasswordController.text ||
         _nicknameController.text.isEmpty) {
@@ -39,8 +42,7 @@ class _SignupState extends State<Signup> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Error'),
-          content: const Text(
-              'Please fill all fields and confirm the password correctly.'),
+          content: const Text('Please fill all fields and confirm the password correctly.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -53,11 +55,67 @@ class _SignupState extends State<Signup> {
       );
       return;
     } else {
-      // 회원가입 로직 구현 (API 호출 등)
-      print('Signing up with ID: ${_idController.text}');
-      Navigator.pushNamed(context, '/home');
+      // API 엔드포인트
+      final String apiUrl = 'http://10.40.0.130:3000/users/register';
+
+      // 회원가입 데이터
+      final Map<String, dynamic> signupData = {
+        'username': _idController.text,
+        'password': _passwordController.text,
+        'nickname': _nicknameController.text,
+        'bio': _bioController.text,
+        'profilePicture': _profileImage != null ? base64Encode(_profileImage!.readAsBytesSync()) : null,
+      };
+
+      try {
+        // POST 요청
+        final response = await http.post(
+          Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode(signupData),
+        );
+
+        if (response.statusCode == 201) {
+          // 회원가입 성공
+          print('Signup successful with ID: ${_idController.text}');
+          Navigator.pushNamed(context, '/home');
+        } else {
+          // 회원가입 실패
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Error'),
+              content: Text('Signup failed: ${response.body}'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      } catch (e) {
+        // 네트워크 오류 처리
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Network error: $e'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
-    // Navigate to home or login page
   }
 
   @override
