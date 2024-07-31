@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../services/user_provider.dart'; // UserProvider 임포트 추가
-import '../../services/scrap_service.dart'; // ScrapService 임포트 추가
+import '../../services/scrap_service.dart';
+import '../model/user_model.dart'; // ScrapService 임포트 추가
 
 class Myclip extends StatefulWidget {
   const Myclip({Key? key}) : super(key: key);
@@ -42,35 +43,28 @@ class _MyclipState extends State<Myclip> {
       final userId = userProvider.userId;
 
       if (userId == null) {
-        // userId가 null인 경우의 처리
         print('User ID is null');
         return;
       }
 
-      final userData = await ScrapService().fetchUserById(userId);
-      print(userData);
-      setState(() {
-        bio = userData['bio'] ?? "No bio available";
-        nickname = userData['nickname'] ?? "No nickname available";
-        followingList = (userData['following'] as List<dynamic>?)?.map<Map<String, String>>((follower) {
-          return {
-            "name": follower['name'] as String,
-            "profilePic": follower['profilePic'] as String? ?? 'assets/images/default.png',
-          };
-        }).toList() ?? [];
-        followerList = (userData['followers'] as List<dynamic>?)?.map<Map<String, String>>((follower) {
-          return {
-            "name": follower['name'] as String,
-            "profilePic": follower['profilePic'] as String? ?? 'assets/images/default.png',
-          };
-        }).toList() ?? [];
-      });
+      User user = await ScrapService().fetchUserById(userId);
 
+      setState(() {
+        bio = user.bio;
+        nickname = user.nickname;
+        followingList = user.following.map((follower) => {
+          "name": follower.name,
+          "profilePic": follower.profilePic,
+        }).toList();
+        followerList = user.followers.map((follower) => {
+          "name": follower.name,
+          "profilePic": follower.profilePic,
+        }).toList();
+      });
     } catch (e) {
       print('Error fetching user data: $e');
     }
   }
-
   // 스크랩 데이터를 서버에서 가져오는 함수
   Future<void> _fetchScrapData() async {
     try {
@@ -268,6 +262,48 @@ class _MyclipState extends State<Myclip> {
                     ),
                   ),
                   Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {},
+                          child: Column(
+                            children: [
+                              Text(
+                                '팔로잉',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                followingList.length.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 32),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Column(
+                            children: [
+                              Text(
+                                '팔로워',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                followerList.length.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
                   ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -325,47 +361,6 @@ class _MyclipState extends State<Myclip> {
                     },
                   ),
                   Divider(),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        GestureDetector(
-                          onTap: () {},
-                          child: Column(
-                            children: [
-                              Text(
-                                '팔로잉',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                followingList.length.toString(),
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(width: 32),
-                        GestureDetector(
-                          onTap: () {},
-                          child: Column(
-                            children: [
-                              Text(
-                                '팔로워',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                followerList.length.toString(),
-                                style: TextStyle(fontSize: 16),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
 
 
 
