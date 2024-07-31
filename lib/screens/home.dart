@@ -110,34 +110,30 @@ class _HomeState extends State<Home> {
           BottomNavigationBarItem(
             icon: ImageIcon(
               AssetImage(
-                  'assets/images/trendingicon.png'), // Custom icon for home
+                  'assets/images/trendingicon.png'), // Custom icon for trending
             ),
             label: 'Trending',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(
-              AssetImage('assets/images/searchicon.png'), // Custom icon for home
+              AssetImage('assets/images/searchicon.png'), // Custom icon for search
             ),
             label: 'Search',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(
-              AssetImage('assets/images/videoicon.png'), // Custom icon for home
+              AssetImage('assets/images/videoicon.png'), // Custom icon for videos
             ),
             label: 'Videos',
           ),
           BottomNavigationBarItem(
             icon: ImageIcon(
-              AssetImage('assets/images/myicon.png'), // Custom icon for home
+              AssetImage('assets/images/myicon.png'), // Custom icon for my clip
             ),
             label: 'My Clip',
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        backgroundColor: Colors.white,
-        // BottomNavigationBar의 배경색을 흰색으로 설정
         onTap: _onItemTapped,
       ),
     );

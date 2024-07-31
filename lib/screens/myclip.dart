@@ -16,6 +16,31 @@ class _MyclipState extends State<Myclip> {
   String nickname = ""; // 기본 닉네임 설정
   List<Map<String, dynamic>> scrapData = []; // 스크랩 데이터 리스트
 
+  final List<Map<String, String>> followingList = [
+    {"name": "김예락", "profilePic": 'assets/images/crabi.png'},
+    {"name": "김서영", "profilePic": 'assets/images/crabi.png'},
+    {"name": "박영민", "profilePic": 'assets/images/crabi.png'},
+  ];
+
+  final List<Map<String, String>> followerList = [
+    {"name": "김예락", "profilePic": 'assets/images/crabi.png'},
+    {"name": "김서영", "profilePic": 'assets/images/crabi.png'},
+    {"name": "박영민", "profilePic": 'assets/images/crabi.png'},
+  ];
+
+  // 추가된 상태 관리용 변수
+  Map<String, bool> followingState = {
+    "김예락": true,
+    "김서영": true,
+    "박영민": true,
+  };
+
+  Map<String, bool> followerState = {
+    "김예락": true,
+    "김서영": true,
+    "박영민": true,
+  };
+
   @override
   void initState() {
     super.initState();
@@ -49,7 +74,8 @@ class _MyclipState extends State<Myclip> {
     TextEditingController controller = TextEditingController(
       text: field == 'bio' ? bio : nickname,
     );
-    String? updatedValue = await showDialog(
+
+    String? updatedValue = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Edit $field'),
@@ -167,6 +193,19 @@ class _MyclipState extends State<Myclip> {
     }
   }
 
+  // 상태를 토글하는 함수
+  void _toggleFollowingState(String name) {
+    setState(() {
+      followingState[name] = !(followingState[name] ?? false);
+    });
+  }
+
+  void _toggleFollowerState(String name) {
+    setState(() {
+      followerState[name] = !(followerState[name] ?? false);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -176,164 +215,230 @@ class _MyclipState extends State<Myclip> {
         toolbarHeight: 0,
         elevation: 0,
       ),
-      body: Center(
-        child: Container(
-          margin: EdgeInsets.all(16),
-          padding: EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.grey[300],
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onLongPress: () => _editField('bio'), // bio 수정
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage('assets/images/crabi.png'),
-                        radius: 40,
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          GestureDetector(
-                            onLongPress: () => _editField('nickname'), // 닉네임 수정
-                            child: Text(
-                              nickname,
-                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          GestureDetector(
-                            onLongPress: () => _editField('bio'), // bio 수정
-                            child: Text(
-                              bio,
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              margin: EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
               ),
-              Divider(),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: scrapData.length, // 스크랩 데이터 개수
-                itemBuilder: (context, index) {
-                  final item = scrapData[index];
-                  final reactions = item["followEmojis"] ?? {}; // reactions가 null일 경우 빈 맵으로 설정
-                  return GestureDetector(
-                    onTap: () => _showDetailDialog(item), // 스크랩 상세 보기
-                    onLongPress: () => _showDeleteDialog(index), // 스크랩 삭제
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onLongPress: () => _editField('bio'),
+                          child: CircleAvatar(
+                            backgroundImage: AssetImage('assets/images/crabi.png'),
+                            radius: 40,
+                          ),
+                        ),
+                        SizedBox(width: 16),
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                item["title"] ?? 'No Content', // 스크랩 제목
-                                style: TextStyle(fontSize: 14),
-                              ),
-                              SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    item["createdAt"] ?? 'No Time', // 스크랩 시간
-                                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                                  ),
-                                  Icon(
-                                    _getEmojiIcon(item["emoji"] ?? 'sentiment_neutral'), // 이모지 아이콘
-                                    size: 14,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 8),
                               GestureDetector(
-                                onTap: () async {
-                                  final url = item["url"];
-                                  if (url != null && await canLaunch(url)) {
-                                    await launch(url); // 링크 열기
-                                  } else {
-                                    throw 'Could not launch $url'; // 에러 처리
-                                  }
-                                },
+                                onLongPress: () => _editField('nickname'),
                                 child: Text(
-                                  "원문 링크 바로가기>>",
-                                  style: TextStyle(fontSize: 12, color: Colors.blue),
+                                  nickname,
+                                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              Divider(),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  _buildReactionIcon(
-                                    Icons.sentiment_very_satisfied,
-                                    reactions["sentiment_very_satisfied"] ?? 0, // 반응 개수
-                                  ),
-                                  _buildReactionIcon(
-                                    Icons.sentiment_satisfied,
-                                    reactions["sentiment_satisfied"] ?? 0, // 반응 개수
-                                  ),
-                                  _buildReactionIcon(
-                                    Icons.sentiment_dissatisfied,
-                                    reactions["sentiment_dissatisfied"] ?? 0, // 반응 개수
-                                  ),
-                                  _buildReactionIcon(
-                                    Icons.sentiment_very_dissatisfied,
-                                    reactions["sentiment_very_dissatisfied"] ?? 0, // 반응 개수
-                                  ),
-                                ],
+                              SizedBox(height: 4),
+                              GestureDetector(
+                                onLongPress: () => _editField('bio'),
+                                child: Text(
+                                  bio,
+                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ),
+                      ],
                     ),
-                  );
-                },
+                  ),
+                  Divider(),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: scrapData.length, // 스크랩 데이터 개수
+                    itemBuilder: (context, index) {
+                      final item = scrapData[index];
+                      final reactions = item["followEmojis"] ?? {}; // reactions가 null일 경우 빈 맵으로 설정
+                      return GestureDetector(
+                        onTap: () => _showDetailDialog(item), // 스크랩 상세 보기
+                        onLongPress: () => _showDeleteDialog(index), // 스크랩 삭제
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item["title"] ?? 'No Content',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  item["createdAt"] ?? 'No Time',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                                SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  children: reactions.entries.map((entry) {
+                                    return Chip(
+                                      label: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            _getEmojiIcon(entry.key),
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 4),
+                                          Text(entry.value.toString()),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {},
+                          child: Column(
+                            children: [
+                              Text(
+                                '팔로잉',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                followingList.length.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(width: 32),
+                        GestureDetector(
+                          onTap: () {},
+                          child: Column(
+                            children: [
+                              Text(
+                                '팔로워',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 4),
+                              Text(
+                                followerList.length.toString(),
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '팔로잉 목록',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: followingList.length, // 팔로잉 목록 개수
+                          itemBuilder: (context, index) {
+                            final user = followingList[index];
+                            final isFollowing = followingState[user["name"] ?? ""] ?? false;
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
+                              ),
+                              title: Text(user["name"] ?? 'No Name'),
+                              trailing: GestureDetector(
+                                onTap: () => _toggleFollowingState(user["name"] ?? ""),
+                                child: Icon(
+                                  isFollowing ? Icons.check : Icons.add,
+                                  color: isFollowing ? Colors.green : Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '팔로워 목록',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: followerList.length, // 팔로워 목록 개수
+                          itemBuilder: (context, index) {
+                            final user = followerList[index];
+                            final isFollower = followerState[user["name"] ?? ""] ?? false;
+                            return ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: AssetImage(user["profilePic"] ?? 'assets/images/crabi.png'),
+                              ),
+                              title: Text(user["name"] ?? 'No Name'),
+                              trailing: GestureDetector(
+                                onTap: () => _toggleFollowerState(user["name"] ?? ""),
+                                child: Icon(
+                                  isFollower ? Icons.check : Icons.add,
+                                  color: isFollower ? Colors.green : Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  // 반응 아이콘 위젯 생성 함수
-  Widget _buildReactionIcon(IconData icon, int count) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.grey),
-        SizedBox(width: 4),
-        Text(count.toString(), style: TextStyle(color: Colors.grey)),
-      ],
-    );
-  }
-}
-
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-      ],
-      child: MaterialApp(
-        home: Myclip(),
-      ),
-    ),
-  );
 }
