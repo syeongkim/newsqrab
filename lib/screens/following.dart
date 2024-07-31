@@ -253,12 +253,9 @@ class _FollowingState extends State<Following> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white, // AppBar 배경색을 흰색으로 설정
+        title: null, // AppBar의 title을 제거
+        toolbarHeight: 0, // AppBar의 높이를 0으로 설정
         elevation: 0, // 그림자 효과를 제거
-        title: Text(
-          'Following',
-          style: TextStyle(color: Colors.black), // 제목 텍스트 색상
-        ),
       ),
       backgroundColor: Colors.white, // body 배경색을 흰색으로 설정
       body: ListView.builder(
