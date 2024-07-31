@@ -259,7 +259,7 @@ class _MyclipState extends State<Myclip> {
                                   }
                                 },
                                 child: Text(
-                                  "원문보기",
+                                  "원문 링크 바로가기>>",
                                   style: TextStyle(fontSize: 12, color: Colors.blue),
                                 ),
                               ),

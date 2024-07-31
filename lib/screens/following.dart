@@ -46,17 +46,18 @@ class _FollowingState extends State<Following> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // AppBar의 title을 제거
-        title: null,
-        // AppBar를 빈 공간으로 대체 (필요에 따라 preferredSize를 사용)
-        toolbarHeight: 0, // AppBar의 높이를 0으로 설정
+        backgroundColor: Colors.white, // AppBar 배경색을 흰색으로 설정
         elevation: 0, // 그림자 효과를 제거
+        title: Text(
+          'Following',
+          style: TextStyle(color: Colors.black), // 제목 텍스트 색상
+        ),
       ),
+      backgroundColor: Colors.white, // body 배경색을 흰색으로 설정
       body: ListView.builder(
         itemCount: scrapData.length,
         itemBuilder: (context, index) {
           final item = scrapData[index];
-          // null 체크 주석 추가
           final profileImage = item["profileImage"] ?? 'assets/images/default.png';
           final profileName = item["profileName"] ?? 'Unknown';
           final scrapContent = item["scrapContent"] ?? 'No content available';
@@ -66,6 +67,7 @@ class _FollowingState extends State<Following> {
           return Padding(
             padding: const EdgeInsets.all(8.0),
             child: Card(
+              color: Colors.grey[300], // 카드 배경색을 회색으로 설정
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
@@ -85,9 +87,17 @@ class _FollowingState extends State<Following> {
                       ],
                     ),
                     SizedBox(height: 8),
-                    Text(
-                      scrapContent,
-                      style: TextStyle(fontSize: 14),
+                    Container(
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.grey.shade300), // Optional: border color
+                      ),
+                      child: Text(
+                        scrapContent,
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -106,7 +116,7 @@ class _FollowingState extends State<Following> {
                         }
                       },
                       child: Text(
-                        link ?? 'No link available',
+                        '원문 링크 바로가기>>',
                         style: TextStyle(fontSize: 12, color: Colors.blue),
                       ),
                     ),
