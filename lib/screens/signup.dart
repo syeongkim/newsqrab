@@ -17,7 +17,8 @@ class Signup extends StatefulWidget {
 class _SignupState extends State<Signup> {
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   File? _profileImage;
@@ -45,7 +46,8 @@ class _SignupState extends State<Signup> {
         context: context,
         builder: (BuildContext context) => AlertDialog(
           title: const Text('Error'),
-          content: const Text('Please fill all fields and confirm the password correctly.'),
+          content: const Text(
+              'Please fill all fields and confirm the password correctly.'),
           actions: <Widget>[
             TextButton(
               onPressed: () {
@@ -143,48 +145,151 @@ class _SignupState extends State<Signup> {
                   children: <Widget>[
                     TextField(
                       controller: _idController,
-                      decoration: InputDecoration(labelText: '아이디'),
+                      decoration: InputDecoration(
+                        labelText: '아이디',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        labelStyle: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      cursorColor: Color(0xFFE65C5C),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                     TextField(
                       controller: _passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: '비밀번호'),
+                      decoration: InputDecoration(
+                        labelText: '비밀번호',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        labelStyle: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      cursorColor: Color(0xFFE65C5C),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                     TextField(
                       controller: _confirmPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(labelText: '비밀번호 확인'),
+                      decoration: InputDecoration(
+                        labelText: '비밀번호 확인',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        labelStyle: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      cursorColor: Color(0xFFE65C5C),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                     TextField(
                       controller: _nicknameController,
-                      decoration: InputDecoration(labelText: '닉네임'),
+                      decoration: InputDecoration(
+                        labelText: '닉네임',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        labelStyle: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      cursorColor: Color(0xFFE65C5C),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                     ),
                     if (_profileImage != null)
                       Image.file(_profileImage!, width: 100, height: 100),
                     SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _pickImage,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black, // Background color for the button
-                        foregroundColor: Colors.white, // Text color for the button
+                    SizedBox(
+                      width: 200,
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed: _pickImage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Color(0xFFE65C5C), // 버튼의 배경색을 #E65C5C로 설정
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(2), // 모서리를 각진 사각형으로 설정
+                          ),
+                        ),
+                        child: Text(
+                          '프로필 사진 업로드',
+                          style: TextStyle(
+                            color: Colors.white, // 글씨 색상을 하얀색으로 설정
+                          ),
+                        ),
                       ),
-                      child: Text('프로필 사진 업로드'),
                     ),
+
                     TextField(
                       controller: _bioController,
-                      decoration: InputDecoration(labelText: '자기소개'),
+                      decoration: InputDecoration(
+                        labelText: '자기소개',
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Color(0xFFE65C5C)),
+                        ),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.grey),
+                        ),
+                        labelStyle: TextStyle(
+                          color: Colors.grey,
+                        ),
+                      ),
+                      cursorColor: Color(0xFFE65C5C),
+                      style: TextStyle(
+                        color: Colors.black,
+                      ),
                       maxLines: 3,
                     ),
                     SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _signup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black, // Background color for the button
-                        foregroundColor: Colors.white, // Text color for the button
+                    SizedBox(
+                      width: 200,
+                      height: 30,
+                      child: ElevatedButton(
+                        onPressed: _signup,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor:
+                              Color(0xFFE65C5C), // 버튼의 배경색을 #E65C5C로 설정
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(2), // 모서리를 각진 사각형으로 설정
+                          ),
+                        ),
+                        child: Text(
+                          '회원가입',
+                          style: TextStyle(
+                            color: Colors.white, // 글씨 색상을 하얀색으로 설정
+                          ),
+                        ),
                       ),
-                      child: Text('회원가입'),
                     ),
-                    SizedBox(height: 50), // Add space to ensure scrolling if needed
+                    SizedBox(
+                        height: 50), // Add space to ensure scrolling if needed
                   ],
                 ),
               ),
