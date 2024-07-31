@@ -1,133 +1,32 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../../services/user_provider.dart'; // UserProvider 임포트 추가
-import '../../services/scrap_service.dart'; // ScrapService 임포트 추가
-
-class Following extends StatefulWidget {
-  const Following({Key? key}) : super(key: key);
-
-  @override
-  _FollowingState createState() => _FollowingState();
-}
-
-class _FollowingState extends State<Following> {
-  List<Map<String, dynamic>> scrapData = [];
-  List<List<int>> emojiCounts = []; // 각 스크랩 항목의 이모지 개수를 추적하기 위한 리스트
-  String? userId;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchScrapData();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    userId = Provider.of<UserProvider>(context).userId;
-  }
-
-  // 팔로우한 사용자의 스크랩 데이터를 가져오는 메서드
-  Future<void> _fetchScrapData() async {
-    try {
-      final scraps = await ScrapService().fetchScrapsByFollowing(context);
-      setState(() {
-        scrapData = scraps.cast<Map<String, dynamic>>();
-        // 스크랩 데이터의 각 항목마다 이모지 개수를 초기화
-        emojiCounts = scrapData.map((item) {
-          final reactions = item["followerEmojis"] ?? [];
-          int verySatisfiedCount = reactions.where((e) => e["emoji"] == "sentiment_very_satisfied").length;
-          int satisfiedCount = reactions.where((e) => e["emoji"] == "sentiment_satisfied").length;
-          int dissatisfiedCount = reactions.where((e) => e["emoji"] == "sentiment_dissatisfied").length;
-          int veryDissatisfiedCount = reactions.where((e) => e["emoji"] == "sentiment_very_dissatisfied").length;
-          return [verySatisfiedCount, satisfiedCount, dissatisfiedCount, veryDissatisfiedCount];
-        }).toList();
-      });
-    } catch (e) {
-      print('Failed to fetch following scraps: $e');
-    }
-  }
-
-  void _incrementEmoji(int scrapIndex, int emojiIndex) async {
-    if (userId == null) {
-      print('User ID is null');
-      return;
-    }
-
-    final scrapId = scrapData[scrapIndex]["_id"];
-    final profileId = scrapData[scrapIndex]["userId"];
-
-    // 이모지 타입 설정
-    String emoji;
-    switch (emojiIndex) {
-      case 0:
-        emoji = "sentiment_very_satisfied";
-        break;
-      case 1:
-        emoji = "sentiment_satisfied";
-        break;
-      case 2:
-        emoji = "sentiment_dissatisfied";
-        break;
-      case 3:
-        emoji = "sentiment_very_dissatisfied";
-        break;
-      default:
-        emoji = "sentiment_neutral";
-    }
-
-    // API 호출하여 이모지 업데이트
-    try {
-      await ScrapService().updateFollowerEmoji(scrapId, userId!, emoji);
-      setState(() {
-        emojiCounts[scrapIndex][emojiIndex]++;
-      });
-    } catch (e) {
-      print('Failed to update emoji: $e');
-    }
-  }
-
-  IconData _getEmojiIcon(String emoji) {
-    switch (emoji) {
-      case "sentiment_very_satisfied":
-        return Icons.sentiment_very_satisfied;
-      case "sentiment_satisfied":
-        return Icons.sentiment_satisfied;
-      case "sentiment_dissatisfied":
-        return Icons.sentiment_dissatisfied;
-      case "sentiment_very_dissatisfied":
-        return Icons.sentiment_very_dissatisfied;
-      default:
-        return Icons.sentiment_neutral;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white, // AppBar 배경색을 흰색으로 설정
-        elevation: 0, // 그림자 효과를 제거
-        title: Text(
-          'Following',
-          style: TextStyle(color: Colors.black), // 제목 텍스트 색상
-        ),
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white, // AppBar 배경색을 흰색으로 설정
+      elevation: 0, // 그림자 효과를 제거
+      title: Text(
+        'Following',
+        style: TextStyle(color: Colors.black), // 제목 텍스트 색상
       ),
-      backgroundColor: Colors.white, // body 배경색을 흰색으로 설정
-      body: ListView.builder(
-        itemCount: scrapData.length,
-        itemBuilder: (context, index) {
-          final item = scrapData[index];
-          final profileImage = item["profileImage"] ?? 'assets/images/crabi.png';
-          final profileName = item["usernickname"] ?? 'Unknown';
-          final scrapContent = item["highlightedText"] ?? 'No content available';
-          final scrapTime = item["createdAt"] ?? 'Unknown time'; // createdAt 필드 사용
-          final link = item["url"] ?? ''; // url 필드 사용
-          final emoji = item["myemoji"] ?? 'sentiment_neutral';
+    ),
+    backgroundColor: Colors.white, // body 배경색을 흰색으로 설정
+    body: ListView.builder(
+      itemCount: scrapData.length,
+      itemBuilder: (context, index) {
+        final item = scrapData[index];
+        final profileImage = item["profileImage"] ?? 'assets/images/crabi.png';
+        final profileName = item["usernickname"] ?? 'Unknown';
+        final scrapContent = item["highlightedText"] ?? 'No content available';
+        final scrapTime = item["createdAt"] ?? 'Unknown time'; // createdAt 필드 사용
+        final link = item["url"] ?? ''; // url 필드 사용
+        final emoji = item["myemoji"] ?? 'sentiment_neutral';
 
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: GestureDetector(
+            onTap: () {
+              _showPopup(context, item);
+            },
             child: Card(
               color: Colors.grey[300], // 카드 배경색을 회색으로 설정
               child: Padding(
@@ -152,23 +51,15 @@ class _FollowingState extends State<Following> {
                     ),
                     SizedBox(height: 8),
                     Container(
-                      constraints: BoxConstraints(
-                        maxWidth: double.infinity, // 너비를 부모 컨테이너의 너비에 맞추기
-                      ),
                       padding: EdgeInsets.all(8.0),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.grey.shade300), // Optional: border color
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            scrapContent,
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
+                      child: Text(
+                        scrapContent,
+                        style: TextStyle(fontSize: 14),
                       ),
                     ),
                     SizedBox(height: 8),
@@ -236,9 +127,9 @@ class _FollowingState extends State<Following> {
                 ),
               ),
             ),
-          );
-        },
-      ),
-    );
-  }
+          ),
+        );
+      },
+    ),
+  );
 }
