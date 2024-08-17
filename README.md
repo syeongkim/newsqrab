@@ -63,17 +63,18 @@ newsqrab은 생성형 AI를 사용해 제작한 뉴스 숏폼을 제공하고, �
 - 각 기사를 클릭하면 기사 원문을 확인하고, 스크랩을 할 수 있습니다.
 
 ## 5️⃣ 제작자별로 오늘의 뉴스 숏폼 확인
-<video src="https://github.com/user-attachments/assets/c6a66bf6-7423-4a4c-9416-1ea593e4892a">
-<br>
+https://github.com/user-attachments/assets/c6a66bf6-7423-4a4c-9416-1ea593e4892a
+
+
 - 기본 제작자인 newsqrab과 언론사 (ex. YTN, 스포츠조선, 조선일보, 헤럴드경제) 등으로 구성된 숏폼 제작자들이 제작한 오늘의 뉴스 숏폼을 확인할 수 있습니다.
 - 각 제작자 버튼을 클릭하면 해당 제작자가 제작한 숏폼들만 필터링하여 확인할 수 있습니다.
 <br>
 
 **예시 뉴스 숏폼**
-<video src="https://github.com/user-attachments/assets/442adf6f-e0df-41fb-a830-a1c7373d5f36">
-<video src="https://github.com/user-attachments/assets/31bece0e-fb0f-4c40-a71a-62787ccbe5a1">
-<video src="https://github.com/user-attachments/assets/4cb90cf4-b124-4073-a2d0-9069809c21c0">
-<br>
+https://github.com/user-attachments/assets/442adf6f-e0df-41fb-a830-a1c7373d5f36
+https://github.com/user-attachments/assets/31bece0e-fb0f-4c40-a71a-62787ccbe5a1
+https://github.com/user-attachments/assets/4cb90cf4-b124-4073-a2d0-9069809c21c0
+
 
 ## 6️⃣ 마이페이지
 <img src="https://github.com/user-attachments/assets/36f50cef-9b12-4714-a159-d72956c9d5d6">
