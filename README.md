@@ -72,8 +72,11 @@ https://github.com/user-attachments/assets/c6a66bf6-7423-4a4c-9416-1ea593e4892a
 
 **예시 뉴스 숏폼**
 https://github.com/user-attachments/assets/442adf6f-e0df-41fb-a830-a1c7373d5f36
+
 https://github.com/user-attachments/assets/31bece0e-fb0f-4c40-a71a-62787ccbe5a1
+
 https://github.com/user-attachments/assets/4cb90cf4-b124-4073-a2d0-9069809c21c0
+
 
 
 ## 6️⃣ 마이페이지
