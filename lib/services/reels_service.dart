@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ReelsService {
-  final String baseUrl = 'http://175.106.98.197:3000/reels';
+  final String baseUrl = 'http://13.124.11.216:3000/reels';
 
   // 댓글을 추가하는 메서드
   Future<void> addComment(String reelId, String userId, String nickname, String content, {String? profilePicture}) async {
@@ -70,7 +70,7 @@ class ReelsService {
 
   // 특정 ID로 기사를 가져오는 메서드 추가
   Future<dynamic> fetchArticleById(String articleId) async {
-    final String url = 'http://175.106.98.197:3000/articles/$articleId'; // 기사 ID를 사용하여 URL을 구성
+    final String url = 'http://13.124.11.216:3000/articles/$articleId'; // 기사 ID를 사용하여 URL을 구성
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

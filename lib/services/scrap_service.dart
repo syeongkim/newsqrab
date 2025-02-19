@@ -6,7 +6,7 @@ import 'user_provider.dart';
 import 'package:flutter/material.dart';
 
 class ScrapService {
-  final String baseUrl = 'http://175.106.98.197:3000/scraps';
+  final String baseUrl = 'http://13.124.11.216:3000/scraps';
 
   Future<List<dynamic>> fetchScrapsByUserNickname(BuildContext context) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -68,7 +68,7 @@ class ScrapService {
   }
 
   Future<List<dynamic>> fetchTopUsers() async {
-    final String url = 'http://175.106.98.197:3000/users/kings';
+    final String url = 'http://13.124.11.216:3000/users/kings';
 
     final response = await http.get(Uri.parse(url));
 
@@ -81,7 +81,7 @@ class ScrapService {
 
   // 팔로우 상태를 업데이트하는 메서드 추가
   Future<void> updateFollowing(String userId, String followUserId) async {
-    final String url = 'http://175.106.98.197:3000/users/$userId/following/$followUserId';
+    final String url = 'http://13.124.11.216:3000/users/$userId/following/$followUserId';
 
     final response = await http.put(
       Uri.parse(url),
@@ -97,7 +97,7 @@ class ScrapService {
 
   // 언팔로우 상태를 업데이트하는 메서드 추가
   Future<void> deleteFollowing(String userId, String unfollowUserId) async {
-    final String url = 'http://175.106.98.197:3000/users/$userId/following/$unfollowUserId';
+    final String url = 'http://13.124.11.216:3000/users/$userId/following/$unfollowUserId';
 
     final response = await http.delete(
       Uri.parse(url),
@@ -113,7 +113,7 @@ class ScrapService {
   // GET /users/{id} API를 호출하는 메서드 추가
   Future<User> fetchUserById(String userId) async {
     print('^^^^^^^^^^^^^^^^^^^^함수호출시작');
-    final String url = 'http://175.106.98.197:3000/users/$userId';
+    final String url = 'http://13.124.11.216:3000/users/$userId';
     final response = await http.get(Uri.parse(url));
 print('*************get요청보냄');
     if (response.statusCode == 200) {
